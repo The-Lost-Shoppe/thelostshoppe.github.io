@@ -10,13 +10,12 @@
 /**
 * Request class
 */
-namespace Opencart\System\Library;
 class Request {
-	public $get = [];
-	public $post = [];
-	public $cookie = [];
-	public $files = [];
-	public $server = [];
+	public $get = array();
+	public $post = array();
+	public $cookie = array();
+	public $files = array();
+	public $server = array();
 	
 	/**
 	 * Constructor
@@ -44,7 +43,7 @@ class Request {
 				$data[$this->clean($key)] = $this->clean($value);
 			}
 		} else {
-			$data = trim(htmlspecialchars($data, ENT_COMPAT, 'UTF-8'));
+			$data = htmlspecialchars($data, ENT_COMPAT, 'UTF-8');
 		}
 
 		return $data;

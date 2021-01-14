@@ -1,29 +1,27 @@
 <?php
-namespace Opencart\Application\Controller\Marketing;
-class Contact extends \Opencart\System\Engine\Controller {
+class ControllerMarketingContact extends Controller {
+	private $error = array();
+
 	public function index() {
 		$this->load->language('marketing/contact');
 
 		$this->document->setTitle($this->language->get('heading_title'));
 
-		$this->document->addScript('view/javascript/ckeditor/ckeditor.js');
-		$this->document->addScript('view/javascript/ckeditor/adapters/jquery.js');
-
 		$data['user_token'] = $this->session->data['user_token'];
 
-		$data['breadcrumbs'] = [];
+		$data['breadcrumbs'] = array();
 
-		$data['breadcrumbs'][] = [
+		$data['breadcrumbs'][] = array(
 			'text' => $this->language->get('text_home'),
-			'href' => $this->url->link('common/dashboard', 'user_token=' . $this->session->data['user_token'])
-		];
+			'href' => $this->url->link('common/dashboard', 'user_token=' . $this->session->data['user_token'], true)
+		);
 
-		$data['breadcrumbs'][] = [
+		$data['breadcrumbs'][] = array(
 			'text' => $this->language->get('heading_title'),
-			'href' => $this->url->link('marketing/contact', 'user_token=' . $this->session->data['user_token'])
-		];
+			'href' => $this->url->link('marketing/contact', 'user_token=' . $this->session->data['user_token'], true)
+		);
 
-		$data['cancel'] = $this->url->link('marketing/contact', 'user_token=' . $this->session->data['user_token']);
+		$data['cancel'] = $this->url->link('marketing/contact', 'user_token=' . $this->session->data['user_token'], true);
 
 		$this->load->model('setting/store');
 
@@ -43,7 +41,7 @@ class Contact extends \Opencart\System\Engine\Controller {
 	public function send() {
 		$this->load->language('marketing/contact');
 
-		$json = [];
+		$json = array();
 
 		if ($this->request->server['REQUEST_METHOD'] == 'POST') {
 			if (!$this->user->hasPermission('modify', 'marketing/contact')) {
@@ -60,9 +58,6 @@ class Contact extends \Opencart\System\Engine\Controller {
 
 			if (!$json) {
 				$this->load->model('setting/store');
-				$this->load->model('setting/setting');
-				$this->load->model('customer/customer');
-				$this->load->model('sale/order');
 
 				$store_info = $this->model_setting_store->getStore($this->request->post['store_id']);
 
@@ -71,28 +66,34 @@ class Contact extends \Opencart\System\Engine\Controller {
 				} else {
 					$store_name = $this->config->get('config_name');
 				}
-
+				
+				$this->load->model('setting/setting');
 				$setting = $this->model_setting_setting->getSetting('config', $this->request->post['store_id']);
-
 				$store_email = isset($setting['config_email']) ? $setting['config_email'] : $this->config->get('config_email');
 
+				$this->load->model('customer/customer');
+
+				$this->load->model('customer/customer_group');
+
+				$this->load->model('sale/order');
+
 				if (isset($this->request->get['page'])) {
-					$page = (int)$this->request->get['page'];
+					$page = $this->request->get['page'];
 				} else {
 					$page = 1;
 				}
 
 				$email_total = 0;
 
-				$emails = [];
+				$emails = array();
 
 				switch ($this->request->post['to']) {
 					case 'newsletter':
-						$customer_data = [
+						$customer_data = array(
 							'filter_newsletter' => 1,
 							'start'             => ($page - 1) * 10,
 							'limit'             => 10
-						];
+						);
 
 						$email_total = $this->model_customer_customer->getTotalCustomers($customer_data);
 
@@ -103,10 +104,10 @@ class Contact extends \Opencart\System\Engine\Controller {
 						}
 						break;
 					case 'customer_all':
-						$customer_data = [
+						$customer_data = array(
 							'start' => ($page - 1) * 10,
 							'limit' => 10
-						];
+						);
 
 						$email_total = $this->model_customer_customer->getTotalCustomers($customer_data);
 
@@ -117,11 +118,11 @@ class Contact extends \Opencart\System\Engine\Controller {
 						}
 						break;
 					case 'customer_group':
-						$customer_data = [
+						$customer_data = array(
 							'filter_customer_group_id' => $this->request->post['customer_group_id'],
 							'start'                    => ($page - 1) * 10,
 							'limit'                    => 10
-						];
+						);
 
 						$email_total = $this->model_customer_customer->getTotalCustomers($customer_data);
 
@@ -133,11 +134,7 @@ class Contact extends \Opencart\System\Engine\Controller {
 						break;
 					case 'customer':
 						if (!empty($this->request->post['customer'])) {
-							$email_total = count($this->request->post['customer']);
-
-							$customers = array_slice($this->request->post['customer'], ($page - 1) * 10, 10);
-
-							foreach ($customers as $customer_id) {
+							foreach ($this->request->post['customer'] as $customer_id) {
 								$customer_info = $this->model_customer_customer->getCustomer($customer_id);
 
 								if ($customer_info) {
@@ -147,11 +144,11 @@ class Contact extends \Opencart\System\Engine\Controller {
 						}
 						break;
 					case 'affiliate_all':
-						$affiliate_data = [
+						$affiliate_data = array(
 							'filter_affiliate' => 1,
 							'start'            => ($page - 1) * 10,
 							'limit'            => 10
-						];
+						);
 
 						$email_total = $this->model_customer_customer->getTotalCustomers($affiliate_data);
 
@@ -163,17 +160,13 @@ class Contact extends \Opencart\System\Engine\Controller {
 						break;
 					case 'affiliate':
 						if (!empty($this->request->post['affiliate'])) {
-							$affiliates = array_slice($this->request->post['affiliate'], ($page - 1) * 10, 10);
-
-							foreach ($affiliates as $affiliate_id) {
+							foreach ($this->request->post['affiliate'] as $affiliate_id) {
 								$affiliate_info = $this->model_customer_customer->getCustomer($affiliate_id);
 
 								if ($affiliate_info) {
 									$emails[] = $affiliate_info['email'];
 								}
 							}
-
-							$email_total = count($this->request->post['affiliate']);
 						}
 						break;
 					case 'product':
@@ -198,12 +191,12 @@ class Contact extends \Opencart\System\Engine\Controller {
 					$json['success'] = sprintf($this->language->get('text_sent'), $start, $email_total);
 
 					if ($end < $email_total) {
-						$json['next'] = str_replace('&amp;', '&', $this->url->link('marketing/contact|send', 'user_token=' . $this->session->data['user_token'] . '&page=' . ($page + 1)));
+						$json['next'] = str_replace('&amp;', '&', $this->url->link('marketing/contact/send', 'user_token=' . $this->session->data['user_token'] . '&page=' . ($page + 1), true));
 					} else {
 						$json['next'] = '';
 					}
 
-					$message  = '<html dir="ltr" lang="' . $this->language->get('code') . '">' . "\n";
+					$message  = '<html dir="ltr" lang="en">' . "\n";
 					$message .= '  <head>' . "\n";
 					$message .= '    <title>' . $this->request->post['subject'] . '</title>' . "\n";
 					$message .= '    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">' . "\n";
@@ -211,17 +204,17 @@ class Contact extends \Opencart\System\Engine\Controller {
 					$message .= '  <body>' . html_entity_decode($this->request->post['message'], ENT_QUOTES, 'UTF-8') . '</body>' . "\n";
 					$message .= '</html>' . "\n";
 
-					$mail = new \Opencart\System\Library\Mail($this->config->get('config_mail_engine'));
-					$mail->parameter = $this->config->get('config_mail_parameter');
-					$mail->smtp_hostname = $this->config->get('config_mail_smtp_hostname');
-					$mail->smtp_username = $this->config->get('config_mail_smtp_username');
-					$mail->smtp_password = html_entity_decode($this->config->get('config_mail_smtp_password'), ENT_QUOTES, 'UTF-8');
-					$mail->smtp_port = $this->config->get('config_mail_smtp_port');
-					$mail->smtp_timeout = $this->config->get('config_mail_smtp_timeout');
-
 					foreach ($emails as $email) {
 						if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
-							$mail->setTo(trim($email));
+							$mail = new Mail($this->config->get('config_mail_engine'));
+							$mail->parameter = $this->config->get('config_mail_parameter');
+							$mail->smtp_hostname = $this->config->get('config_mail_smtp_hostname');
+							$mail->smtp_username = $this->config->get('config_mail_smtp_username');
+							$mail->smtp_password = html_entity_decode($this->config->get('config_mail_smtp_password'), ENT_QUOTES, 'UTF-8');
+							$mail->smtp_port = $this->config->get('config_mail_smtp_port');
+							$mail->smtp_timeout = $this->config->get('config_mail_smtp_timeout');
+
+							$mail->setTo($email);
 							$mail->setFrom($store_email);
 							$mail->setSender(html_entity_decode($store_name, ENT_QUOTES, 'UTF-8'));
 							$mail->setSubject(html_entity_decode($this->request->post['subject'], ENT_QUOTES, 'UTF-8'));

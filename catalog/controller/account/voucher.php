@@ -1,7 +1,6 @@
 <?php
-namespace Opencart\Application\Controller\Account;
-class Voucher extends \Opencart\System\Engine\Controller {
-	private $error = [];
+class ControllerAccountVoucher extends Controller {
+	private $error = array();
 
 	public function index() {
 		$this->load->language('account/voucher');
@@ -9,12 +8,12 @@ class Voucher extends \Opencart\System\Engine\Controller {
 		$this->document->setTitle($this->language->get('heading_title'));
 
 		if (!isset($this->session->data['vouchers'])) {
-			$this->session->data['vouchers'] = [];
+			$this->session->data['vouchers'] = array();
 		}
 
 		if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validate()) {
-			$this->session->data['vouchers'][mt_rand()] = [
-				'description'      => sprintf($this->language->get('text_for'), $this->currency->format($this->request->post['amount'], $this->session->data['currency'], 1.0), $this->request->post['to_name']),
+			$this->session->data['vouchers'][mt_rand()] = array(
+				'description'      => sprintf($this->language->get('text_for'), $this->currency->format($this->request->post['amount'], $this->session->data['currency']), $this->request->post['to_name']),
 				'to_name'          => $this->request->post['to_name'],
 				'to_email'         => $this->request->post['to_email'],
 				'from_name'        => $this->request->post['from_name'],
@@ -22,27 +21,27 @@ class Voucher extends \Opencart\System\Engine\Controller {
 				'voucher_theme_id' => $this->request->post['voucher_theme_id'],
 				'message'          => $this->request->post['message'],
 				'amount'           => $this->currency->convert($this->request->post['amount'], $this->session->data['currency'], $this->config->get('config_currency'))
-			];
+			);
 
-			$this->response->redirect($this->url->link('account/voucher|success', 'language=' . $this->config->get('config_language')));
+			$this->response->redirect($this->url->link('account/voucher/success'));
 		}
 
-		$data['breadcrumbs'] = [];
+		$data['breadcrumbs'] = array();
 
-		$data['breadcrumbs'][] = [
+		$data['breadcrumbs'][] = array(
 			'text' => $this->language->get('text_home'),
-			'href' => $this->url->link('common/home', 'language=' . $this->config->get('config_language'))
-		];
+			'href' => $this->url->link('common/home')
+		);
 
-		$data['breadcrumbs'][] = [
+		$data['breadcrumbs'][] = array(
 			'text' => $this->language->get('text_account'),
-			'href' => $this->url->link('account/account', 'language=' . $this->config->get('config_language'))
-		];
+			'href' => $this->url->link('account/account', '', true)
+		);
 
-		$data['breadcrumbs'][] = [
+		$data['breadcrumbs'][] = array(
 			'text' => $this->language->get('text_voucher'),
-			'href' => $this->url->link('account/voucher', 'language=' . $this->config->get('config_language'))
-		];
+			'href' => $this->url->link('account/voucher', '', true)
+		);
 
 		$data['help_amount'] = sprintf($this->language->get('help_amount'), $this->currency->format($this->config->get('config_voucher_min'), $this->session->data['currency']), $this->currency->format($this->config->get('config_voucher_max'), $this->session->data['currency']));
 
@@ -88,7 +87,7 @@ class Voucher extends \Opencart\System\Engine\Controller {
 			$data['error_amount'] = '';
 		}
 
-		$data['action'] = $this->url->link('account/voucher', 'language=' . $this->config->get('config_language'));
+		$data['action'] = $this->url->link('account/voucher', '', true);
 
 		if (isset($this->request->post['to_name'])) {
 			$data['to_name'] = $this->request->post['to_name'];
@@ -118,9 +117,9 @@ class Voucher extends \Opencart\System\Engine\Controller {
 			$data['from_email'] = '';
 		}
 
-		$this->load->model('account/voucher_theme');
+		$this->load->model('extension/total/voucher_theme');
 
-		$data['voucher_themes'] = $this->model_account_voucher_theme->getVoucherThemes();
+		$data['voucher_themes'] = $this->model_extension_total_voucher_theme->getVoucherThemes();
 
 		if (isset($this->request->post['voucher_theme_id'])) {
 			$data['voucher_theme_id'] = $this->request->post['voucher_theme_id'];
@@ -161,19 +160,19 @@ class Voucher extends \Opencart\System\Engine\Controller {
 
 		$this->document->setTitle($this->language->get('heading_title'));
 
-		$data['breadcrumbs'] = [];
+		$data['breadcrumbs'] = array();
 
-		$data['breadcrumbs'][] = [
+		$data['breadcrumbs'][] = array(
 			'text' => $this->language->get('text_home'),
-			'href' => $this->url->link('common/home', 'language=' . $this->config->get('config_language'))
-		];
+			'href' => $this->url->link('common/home')
+		);
 
-		$data['breadcrumbs'][] = [
+		$data['breadcrumbs'][] = array(
 			'text' => $this->language->get('heading_title'),
-			'href' => $this->url->link('account/voucher', 'language=' . $this->config->get('config_language'))
-		];
+			'href' => $this->url->link('account/voucher')
+		);
 
-		$data['continue'] = $this->url->link('checkout/cart', 'language=' . $this->config->get('config_language'));
+		$data['continue'] = $this->url->link('checkout/cart');
 
 		$data['column_left'] = $this->load->controller('common/column_left');
 		$data['column_right'] = $this->load->controller('common/column_right');
@@ -206,7 +205,7 @@ class Voucher extends \Opencart\System\Engine\Controller {
 			$this->error['theme'] = $this->language->get('error_theme');
 		}
 
-		if (($this->currency->convert((int)$this->request->post['amount'], $this->session->data['currency'], $this->config->get('config_currency')) < $this->config->get('config_voucher_min')) || ($this->currency->convert($this->request->post['amount'], $this->session->data['currency'], $this->config->get('config_currency')) > $this->config->get('config_voucher_max'))) {
+		if (($this->currency->convert($this->request->post['amount'], $this->session->data['currency'], $this->config->get('config_currency')) < $this->config->get('config_voucher_min')) || ($this->currency->convert($this->request->post['amount'], $this->session->data['currency'], $this->config->get('config_currency')) > $this->config->get('config_voucher_max'))) {
 			$this->error['amount'] = sprintf($this->language->get('error_amount'), $this->currency->format($this->config->get('config_voucher_min'), $this->session->data['currency']), $this->currency->format($this->config->get('config_voucher_max'), $this->session->data['currency']));
 		}
 

@@ -1,7 +1,6 @@
 <?php
-namespace Opencart\Application\Controller\Sale;
-class Recurring extends \Opencart\System\Engine\Controller {
-	private $error = [];
+class ControllerSaleRecurring extends Controller {
+	private $error = array();
 
 	public function index() {
 		$this->load->language('sale/recurring');
@@ -15,13 +14,13 @@ class Recurring extends \Opencart\System\Engine\Controller {
 
 	protected function getList() {
 		if (isset($this->request->get['filter_order_recurring_id'])) {
-			$filter_order_recurring_id = (int)$this->request->get['filter_order_recurring_id'];
+			$filter_order_recurring_id = $this->request->get['filter_order_recurring_id'];
 		} else {
 			$filter_order_recurring_id = '';
 		}
 
 		if (isset($this->request->get['filter_order_id'])) {
-			$filter_order_id = (int)$this->request->get['filter_order_id'];
+			$filter_order_id = $this->request->get['filter_order_id'];
 		} else {
 			$filter_order_id = '';
 		}
@@ -47,7 +46,7 @@ class Recurring extends \Opencart\System\Engine\Controller {
 		if (isset($this->request->get['sort'])) {
 			$sort = $this->request->get['sort'];
 		} else {
-			$sort = 'or.order_recurring_id';
+			$sort = 'order_recurring_id';
 		}
 
 		if (isset($this->request->get['filter_date_added'])) {
@@ -63,7 +62,7 @@ class Recurring extends \Opencart\System\Engine\Controller {
 		}
 
 		if (isset($this->request->get['page'])) {
-			$page = (int)$this->request->get['page'];
+			$page = $this->request->get['page'];
 		} else {
 			$page = 1;
 		}
@@ -106,21 +105,21 @@ class Recurring extends \Opencart\System\Engine\Controller {
 			$url .= '&page=' . $this->request->get['page'];
 		}
 
-		$data['breadcrumbs'] = [];
+		$data['breadcrumbs'] = array();
 
-		$data['breadcrumbs'][] = [
+		$data['breadcrumbs'][] = array(
 			'text' => $this->language->get('text_home'),
-			'href' => $this->url->link('common/dashboard', 'user_token=' . $this->session->data['user_token'])
-		];
+			'href' => $this->url->link('common/dashboard', 'user_token=' . $this->session->data['user_token'], true)
+		);
 
-		$data['breadcrumbs'][] = [
+		$data['breadcrumbs'][] = array(
 			'text' => $this->language->get('heading_title'),
-			'href' => $this->url->link('sale/recurring', 'user_token=' . $this->session->data['user_token'] . $url)
-		];
+			'href' => $this->url->link('sale/recurring', 'user_token=' . $this->session->data['user_token'] . $url, true)
+		);
 
-		$data['recurrings'] = [];
+		$data['recurrings'] = array();
 
-		$filter_data = [
+		$filter_data = array(
 			'filter_order_recurring_id' => $filter_order_recurring_id,
 			'filter_order_id'           => $filter_order_id,
 			'filter_reference'          => $filter_reference,
@@ -129,9 +128,9 @@ class Recurring extends \Opencart\System\Engine\Controller {
 			'filter_date_added'         => $filter_date_added,
 			'order'                     => $order,
 			'sort'                      => $sort,
-			'start'                     => ($page - 1) * $this->config->get('config_pagination_admin'),
-			'limit'                     => $this->config->get('config_pagination_admin')
-		];
+			'start'                     => ($page - 1) * $this->config->get('config_limit_admin'),
+			'limit'                     => $this->config->get('config_limit_admin')
+		);
 
 		$recurrings_total = $this->model_sale_recurring->getTotalRecurrings($filter_data);
 
@@ -144,16 +143,16 @@ class Recurring extends \Opencart\System\Engine\Controller {
 				$status = '';
 			}
 			
-			$data['recurrings'][] = [
+			$data['recurrings'][] = array(
 				'order_recurring_id' => $result['order_recurring_id'],
 				'order_id'           => $result['order_id'],
 				'reference'          => $result['reference'],
 				'customer'           => $result['customer'],
 				'status'             => $status,
 				'date_added'         => date($this->language->get('date_format_short'), strtotime($result['date_added'])),
-				'view'               => $this->url->link('sale/recurring|info', 'user_token=' . $this->session->data['user_token'] . '&order_recurring_id=' . $result['order_recurring_id'] . $url),
-				'order'              => $this->url->link('sale/order|info', 'user_token=' . $this->session->data['user_token'] . '&order_id=' . $result['order_id'])
-			];
+				'view'               => $this->url->link('sale/recurring/info', 'user_token=' . $this->session->data['user_token'] . '&order_recurring_id=' . $result['order_recurring_id'] . $url, true),
+				'order'              => $this->url->link('sale/order/info', 'user_token=' . $this->session->data['user_token'] . '&order_id=' . $result['order_id'], true)
+			);
 		}
 
 		$data['user_token'] = $this->session->data['user_token'];
@@ -208,12 +207,12 @@ class Recurring extends \Opencart\System\Engine\Controller {
 			$url .= '&page=' . $this->request->get['page'];
 		}
 
-		$data['sort_order_recurring'] = $this->url->link('sale/recurring', 'user_token=' . $this->session->data['user_token'] . '&sort=or.order_recurring_id' . $url);
-		$data['sort_order'] = $this->url->link('sale/recurring', 'user_token=' . $this->session->data['user_token'] . '&sort=or.order_id' . $url);
-		$data['sort_reference'] = $this->url->link('sale/recurring', 'user_token=' . $this->session->data['user_token'] . '&sort=or.reference' . $url);
-		$data['sort_customer'] = $this->url->link('sale/recurring', 'user_token=' . $this->session->data['user_token'] . '&sort=customer' . $url);
-		$data['sort_status'] = $this->url->link('sale/recurring', 'user_token=' . $this->session->data['user_token'] . '&sort=or.status' . $url);
-		$data['sort_date_added'] = $this->url->link('sale/recurring', 'user_token=' . $this->session->data['user_token'] . '&sort=or.date_added' . $url);
+		$data['sort_order_recurring'] = $this->url->link('sale/recurring', 'user_token=' . $this->session->data['user_token'] . '&sort=or.order_recurring_id' . $url, true);
+		$data['sort_order'] = $this->url->link('sale/recurring', 'user_token=' . $this->session->data['user_token'] . '&sort=or.order_id' . $url, true);
+		$data['sort_reference'] = $this->url->link('sale/recurring', 'user_token=' . $this->session->data['user_token'] . '&sort=or.reference' . $url, true);
+		$data['sort_customer'] = $this->url->link('sale/recurring', 'user_token=' . $this->session->data['user_token'] . '&sort=customer' . $url, true);
+		$data['sort_status'] = $this->url->link('sale/recurring', 'user_token=' . $this->session->data['user_token'] . '&sort=or.status' . $url, true);
+		$data['sort_date_added'] = $this->url->link('sale/recurring', 'user_token=' . $this->session->data['user_token'] . '&sort=or.date_added' . $url, true);
 
 		$url = '';
 
@@ -248,15 +247,17 @@ class Recurring extends \Opencart\System\Engine\Controller {
 		if (isset($this->request->get['order'])) {
 			$url .= '&order=' . $this->request->get['order'];
 		}
-		
-		$data['pagination'] = $this->load->controller('common/pagination', [
-			'total' => $recurrings_total,
-			'page'  => $page,
-			'limit' => $this->config->get('config_pagination_admin'),
-			'url'   => $this->url->link('sale/recurring', 'user_token=' . $this->session->data['user_token'] . $url . '&page={page}')
-		]);
 
-		$data['results'] = sprintf($this->language->get('text_pagination'), ($recurrings_total) ? (($page - 1) * $this->config->get('config_pagination_admin')) + 1 : 0, ((($page - 1) * $this->config->get('config_pagination_admin')) > ($recurrings_total - $this->config->get('config_pagination_admin'))) ? $recurrings_total : ((($page - 1) * $this->config->get('config_pagination_admin')) + $this->config->get('config_pagination_admin')), $recurrings_total, ceil($recurrings_total / $this->config->get('config_pagination_admin')));
+		$pagination = new Pagination();
+		$pagination->total = $recurrings_total;
+		$pagination->page = $page;
+		$pagination->limit = $this->config->get('config_limit_admin');
+		$pagination->text = $this->language->get('text_pagination');
+		$pagination->url = $this->url->link('sale/recurring', 'user_token=' . $this->session->data['user_token'] . '&page={page}' . $url, true);
+
+		$data['pagination'] = $pagination->render();
+
+		$data['results'] = sprintf($this->language->get('text_pagination'), ($recurrings_total) ? (($page - 1) * $this->config->get('config_limit_admin')) + 1 : 0, ((($page - 1) * $this->config->get('config_limit_admin')) > ($recurrings_total - $this->config->get('config_limit_admin'))) ? $recurrings_total : ((($page - 1) * $this->config->get('config_limit_admin')) + $this->config->get('config_limit_admin')), $recurrings_total, ceil($recurrings_total / $this->config->get('config_limit_admin')));
 
 		$data['filter_order_recurring_id'] = $filter_order_recurring_id;
 		$data['filter_order_id'] = $filter_order_id;
@@ -268,18 +269,18 @@ class Recurring extends \Opencart\System\Engine\Controller {
 		$data['sort'] = $sort;
 		$data['order'] = $order;
 		
-		$data['recurring_statuses'] = [];
+		$data['recurring_statuses'] = array();
 		
-		$data['recurring_statuses'][0] = [
+		$data['recurring_statuses'][0] = array(
 			'text'  => '',
 			'value' => 0
-		];
+		);
 			
 		for ($i = 1; $i <= 6; $i++) {
-			$data['recurring_statuses'][$i] = [
+			$data['recurring_statuses'][$i] = array(
 				'text'  => $this->language->get('text_status_' . $i),
 				'value' => 1
-			];
+			);		
 		}
 
 		$data['header'] = $this->load->controller('common/header');
@@ -293,7 +294,7 @@ class Recurring extends \Opencart\System\Engine\Controller {
 		$this->load->model('sale/recurring');
 		
 		if (isset($this->request->get['order_recurring_id'])) {
-			$order_recurring_id = (int)$this->request->get['order_recurring_id'];
+			$order_recurring_id = $this->request->get['order_recurring_id'];
 		} else {
 			$order_recurring_id = 0;
 		}
@@ -345,19 +346,19 @@ class Recurring extends \Opencart\System\Engine\Controller {
 				$url .= '&page=' . $this->request->get['page'];
 			}
 
-			$data['breadcrumbs'] = [];
+			$data['breadcrumbs'] = array();
 
-			$data['breadcrumbs'][] = [
+			$data['breadcrumbs'][] = array(
 				'text' => $this->language->get('text_home'),
-				'href' => $this->url->link('common/dashboard', 'user_token=' . $this->session->data['user_token'])
-			];
+				'href' => $this->url->link('common/dashboard', 'user_token=' . $this->session->data['user_token'], true)
+			);
 
-			$data['breadcrumbs'][] = [
+			$data['breadcrumbs'][] = array(
 				'text' => $this->language->get('heading_title'),
-				'href' => $this->url->link('sale/recurring', 'user_token=' . $this->session->data['user_token'] . $url)
-			];
+				'href' => $this->url->link('sale/recurring', 'user_token=' . $this->session->data['user_token'] . $url, true)
+			);
 
-			$data['cancel'] = $this->url->link('sale/recurring', 'user_token=' . $this->session->data['user_token'] . $url);
+			$data['cancel'] = $this->url->link('sale/recurring', 'user_token=' . $this->session->data['user_token'] . $url, true);
 			
 			// Recurring
 			$data['order_recurring_id'] = $order_recurring_info['order_recurring_id'];
@@ -365,7 +366,7 @@ class Recurring extends \Opencart\System\Engine\Controller {
 			$data['recurring_name'] = $order_recurring_info['recurring_name'];
 			
 			if ($order_recurring_info['recurring_id']) {
-				$data['recurring'] = $this->url->link('catalog/recurring|edit', 'user_token=' . $this->session->data['user_token'] . '&recurring_id=' . $order_recurring_info['recurring_id']);
+				$data['recurring'] = $this->url->link('catalog/recurring/edit', 'user_token=' . $this->session->data['user_token'] . '&recurring_id=' . $order_recurring_info['recurring_id'], true);
 			} else {
 				$data['recurring'] = '';
 			}			
@@ -386,12 +387,12 @@ class Recurring extends \Opencart\System\Engine\Controller {
 			
 			// Order
 			$data['order_id'] = $order_info['order_id'];
-			$data['order'] = $this->url->link('sale/order|info', 'user_token=' . $this->session->data['user_token'] . '&order_id=' . $order_info['order_id']);
+			$data['order'] = $this->url->link('sale/order/info', 'user_token=' . $this->session->data['user_token'] . '&order_id=' . $order_info['order_id'], true);
 			$data['firstname'] = $order_info['firstname'];
 			$data['lastname'] = $order_info['lastname'];
 			
 			if ($order_info['customer_id']) {
-				$data['customer'] = $this->url->link('customer/customer|edit', 'user_token=' . $this->session->data['user_token'] . '&customer_id=' . $order_info['customer_id']);
+				$data['customer'] = $this->url->link('customer/customer/edit', 'user_token=' . $this->session->data['user_token'] . '&customer_id=' . $order_info['customer_id'], true);
 			} else {
 				$data['customer'] = '';
 			}
@@ -405,19 +406,19 @@ class Recurring extends \Opencart\System\Engine\Controller {
 			$data['quantity'] = $order_recurring_info['product_quantity'];
 
 			// Transactions
-			$data['transactions'] = [];
+			$data['transactions'] = array();
 			
 			$transactions = $this->model_sale_recurring->getRecurringTransactions($order_recurring_info['order_recurring_id']);
 
 			foreach ($transactions as $transaction) {
-				$data['transactions'][] = [
+				$data['transactions'][] = array(
 					'date_added' => $transaction['date_added'],
 					'type'       => $transaction['type'],
 					'amount'     => $this->currency->format($transaction['amount'], $order_info['currency_code'], $order_info['currency_value'])
-				];
+				);
 			}
 
-			$data['buttons'] = $this->load->controller('extension/payment/' . $order_info['payment_code'] . '/recurring');
+			$data['buttons'] = $this->load->controller('extension/payment/' . $order_info['payment_code'] . '/recurringButtons');
 
 			$data['header'] = $this->load->controller('common/header');
 			$data['column_left'] = $this->load->controller('common/column_left');
@@ -425,7 +426,7 @@ class Recurring extends \Opencart\System\Engine\Controller {
 
 			$this->response->setOutput($this->load->view('sale/recurring_info', $data));
 		} else {
-			return new \Opencart\System\Engine\Action('error/not_found');
+			return new Action('error/not_found');
 		}
 	}
 }

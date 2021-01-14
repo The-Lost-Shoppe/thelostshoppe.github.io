@@ -1,6 +1,5 @@
 <?php
-namespace Opencart\Application\Controller\Checkout;
-class Login extends \Opencart\System\Engine\Controller {
+class ControllerCheckoutLogin extends Controller {
 	public function index() {
 		$this->load->language('checkout/checkout');
 
@@ -12,7 +11,7 @@ class Login extends \Opencart\System\Engine\Controller {
 			$data['account'] = 'register';
 		}
 
-		$data['forgotten'] = $this->url->link('account/forgotten', 'language=' . $this->config->get('config_language'));
+		$data['forgotten'] = $this->url->link('account/forgotten', '', true);
 
 		$this->response->setOutput($this->load->view('checkout/login', $data));
 	}
@@ -20,14 +19,14 @@ class Login extends \Opencart\System\Engine\Controller {
 	public function save() {
 		$this->load->language('checkout/checkout');
 
-		$json = [];
+		$json = array();
 
 		if ($this->customer->isLogged()) {
-			$json['redirect'] = $this->url->link('checkout/checkout', 'language=' . $this->config->get('config_language'), true);
+			$json['redirect'] = $this->url->link('checkout/checkout', '', true);
 		}
 
 		if ((!$this->cart->hasProducts() && empty($this->session->data['vouchers'])) || (!$this->cart->hasStock() && !$this->config->get('config_stock_checkout'))) {
-			$json['redirect'] = $this->url->link('checkout/cart', 'language=' . $this->config->get('config_language'), true);
+			$json['redirect'] = $this->url->link('checkout/cart');
 		}
 
 		if (!$json) {
@@ -60,17 +59,17 @@ class Login extends \Opencart\System\Engine\Controller {
 
 		if (!$json) {
 			// Unset guest
-			if (isset($this->session->data['guest'])) {
-				unset($this->session->data['guest']);
-			}
+			unset($this->session->data['guest']);
 
 			// Default Shipping Address
 			$this->load->model('account/address');
 
-			$address_info = $this->model_account_address->getAddress($this->customer->getAddressId());
+			if ($this->config->get('config_tax_customer') == 'payment') {
+				$this->session->data['payment_address'] = $this->model_account_address->getAddress($this->customer->getAddressId());
+			}
 
-			if ($this->config->get('config_tax_customer') && $address_info) {
-				$this->session->data[$this->config->get('config_tax_customer') . '_address'] = $address_info;
+			if ($this->config->get('config_tax_customer') == 'shipping') {
+				$this->session->data['shipping_address'] = $this->model_account_address->getAddress($this->customer->getAddressId());
 			}
 
 			// Wishlist
@@ -84,10 +83,7 @@ class Login extends \Opencart\System\Engine\Controller {
 				}
 			}
 
-			// Log the IP info
-			$this->model_account_customer->addLogin($this->customer->getId(), $this->request->server['REMOTE_ADDR']);
-
-			$json['redirect'] = $this->url->link('checkout/checkout', 'language=' . $this->config->get('config_language'), true);
+			$json['redirect'] = $this->url->link('checkout/checkout', '', true);
 		}
 
 		$this->response->addHeader('Content-Type: application/json');

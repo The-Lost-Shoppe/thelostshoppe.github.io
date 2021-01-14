@@ -10,7 +10,6 @@
 /**
 * Image class
 */
-namespace Opencart\System\Library;
 class Image {
 	private $file;
 	private $image;
@@ -30,7 +29,7 @@ class Image {
 			exit('Error: PHP GD is not installed!');
 		}
 		
-		if (is_file($file)) {
+		if (file_exists($file)) {
 			$this->file = $file;
 
 			$info = getimagesize($file);
@@ -48,7 +47,7 @@ class Image {
 				$this->image = imagecreatefromjpeg($file);
 			}
 		} else {
-			error_log('Error: Could not load image ' . $file . '!');
+			exit('Error: Could not load image ' . $file . '!');
 		}
 	}
 	
@@ -112,12 +111,12 @@ class Image {
      * @param	string	$file
 	 * @param	int		$quality
      */
-	public function save($file, int $quality = 90) {
+	public function save($file, $quality = 90) {
 		$info = pathinfo($file);
 
 		$extension = strtolower($info['extension']);
 
-		if (is_object($this->image) || is_resource($this->image)) {
+		if (is_resource($this->image)) {
 			if ($extension == 'jpeg' || $extension == 'jpg') {
 				imagejpeg($this->image, $file, $quality);
 			} elseif ($extension == 'png') {
@@ -137,7 +136,7 @@ class Image {
 	 * @param	int	$height
 	 * @param	string	$default
      */
-	public function resize(int $width = 0, int $height = 0, $default = '') {
+	public function resize($width = 0, $height = 0, $default = '') {
 		if (!$this->width || !$this->height) {
 			return;
 		}
@@ -172,9 +171,7 @@ class Image {
 		if ($this->mime == 'image/png') {
 			imagealphablending($this->image, false);
 			imagesavealpha($this->image, true);
-
 			$background = imagecolorallocatealpha($this->image, 255, 255, 255, 127);
-
 			imagecolortransparent($this->image, $background);
 		} else {
 			$background = imagecolorallocate($this->image, 255, 255, 255);
@@ -235,8 +232,8 @@ class Image {
 				break;
 		}
 		
-		imagealphablending( $this->image, true);
-		imagesavealpha( $this->image, true);
+		imagealphablending( $this->image, true );
+		imagesavealpha( $this->image, true );
 		imagecopy($this->image, $watermark->getImage(), $watermark_pos_x, $watermark_pos_y, 0, 0, $watermark->getWidth(), $watermark->getHeight());
 
 		imagedestroy($watermark->getImage());
@@ -326,9 +323,9 @@ class Image {
 		}
 
 		if (strlen($color) == 6) {
-			list($r, $g, $b) = [$color[0] . $color[1], $color[2] . $color[3], $color[4] . $color[5]];
+			list($r, $g, $b) = array($color[0] . $color[1], $color[2] . $color[3], $color[4] . $color[5]);
 		} elseif (strlen($color) == 3) {
-			list($r, $g, $b) = [$color[0] . $color[0], $color[1] . $color[1], $color[2] . $color[2]];
+			list($r, $g, $b) = array($color[0] . $color[0], $color[1] . $color[1], $color[2] . $color[2]);
 		} else {
 			return false;
 		}
@@ -337,6 +334,6 @@ class Image {
 		$g = hexdec($g);
 		$b = hexdec($b);
 
-		return [$r, $g, $b];
+		return array($r, $g, $b);
 	}
 }

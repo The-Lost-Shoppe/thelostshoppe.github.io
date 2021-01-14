@@ -1,7 +1,6 @@
 <?php
-namespace Opencart\Application\Controller\Localisation;
-class ReturnStatus extends \Opencart\System\Engine\Controller {
-	private $error = [];
+class ControllerLocalisationReturnStatus extends Controller {
+	private $error = array();
 
 	public function index() {
 		$this->load->language('localisation/return_status');
@@ -39,7 +38,7 @@ class ReturnStatus extends \Opencart\System\Engine\Controller {
 				$url .= '&page=' . $this->request->get['page'];
 			}
 
-			$this->response->redirect($this->url->link('localisation/return_status', 'user_token=' . $this->session->data['user_token'] . $url));
+			$this->response->redirect($this->url->link('localisation/return_status', 'user_token=' . $this->session->data['user_token'] . $url, true));
 		}
 
 		$this->getForm();
@@ -71,7 +70,7 @@ class ReturnStatus extends \Opencart\System\Engine\Controller {
 				$url .= '&page=' . $this->request->get['page'];
 			}
 
-			$this->response->redirect($this->url->link('localisation/return_status', 'user_token=' . $this->session->data['user_token'] . $url));
+			$this->response->redirect($this->url->link('localisation/return_status', 'user_token=' . $this->session->data['user_token'] . $url, true));
 		}
 
 		$this->getForm();
@@ -105,7 +104,7 @@ class ReturnStatus extends \Opencart\System\Engine\Controller {
 				$url .= '&page=' . $this->request->get['page'];
 			}
 
-			$this->response->redirect($this->url->link('localisation/return_status', 'user_token=' . $this->session->data['user_token'] . $url));
+			$this->response->redirect($this->url->link('localisation/return_status', 'user_token=' . $this->session->data['user_token'] . $url, true));
 		}
 
 		$this->getList();
@@ -125,7 +124,7 @@ class ReturnStatus extends \Opencart\System\Engine\Controller {
 		}
 
 		if (isset($this->request->get['page'])) {
-			$page = (int)$this->request->get['page'];
+			$page = $this->request->get['page'];
 		} else {
 			$page = 1;
 		}
@@ -144,40 +143,40 @@ class ReturnStatus extends \Opencart\System\Engine\Controller {
 			$url .= '&page=' . $this->request->get['page'];
 		}
 
-		$data['breadcrumbs'] = [];
+		$data['breadcrumbs'] = array();
 
-		$data['breadcrumbs'][] = [
+		$data['breadcrumbs'][] = array(
 			'text' => $this->language->get('text_home'),
-			'href' => $this->url->link('common/dashboard', 'user_token=' . $this->session->data['user_token'])
-		];
+			'href' => $this->url->link('common/dashboard', 'user_token=' . $this->session->data['user_token'], true)
+		);
 
-		$data['breadcrumbs'][] = [
+		$data['breadcrumbs'][] = array(
 			'text' => $this->language->get('heading_title'),
-			'href' => $this->url->link('localisation/return_status', 'user_token=' . $this->session->data['user_token'] . $url)
-		];
+			'href' => $this->url->link('localisation/return_status', 'user_token=' . $this->session->data['user_token'] . $url, true)
+		);
 
-		$data['add'] = $this->url->link('localisation/return_status|add', 'user_token=' . $this->session->data['user_token'] . $url);
-		$data['delete'] = $this->url->link('localisation/return_status|delete', 'user_token=' . $this->session->data['user_token'] . $url);
+		$data['add'] = $this->url->link('localisation/return_status/add', 'user_token=' . $this->session->data['user_token'] . $url, true);
+		$data['delete'] = $this->url->link('localisation/return_status/delete', 'user_token=' . $this->session->data['user_token'] . $url, true);
 
-		$data['return_statuses'] = [];
+		$data['return_statuses'] = array();
 
-		$filter_data = [
+		$filter_data = array(
 			'sort'  => $sort,
 			'order' => $order,
-			'start' => ($page - 1) * $this->config->get('config_pagination_admin'),
-			'limit' => $this->config->get('config_pagination_admin')
-		];
+			'start' => ($page - 1) * $this->config->get('config_limit_admin'),
+			'limit' => $this->config->get('config_limit_admin')
+		);
 
 		$return_status_total = $this->model_localisation_return_status->getTotalReturnStatuses();
 
 		$results = $this->model_localisation_return_status->getReturnStatuses($filter_data);
 
 		foreach ($results as $result) {
-			$data['return_statuses'][] = [
+			$data['return_statuses'][] = array(
 				'return_status_id' => $result['return_status_id'],
-				'name'             => $result['name'] . (($result['return_status_id'] == $this->config->get('config_return_status_id')) ? $this->language->get('text_default') : ''),
-				'edit'             => $this->url->link('localisation/return_status|edit', 'user_token=' . $this->session->data['user_token'] . '&return_status_id=' . $result['return_status_id'] . $url)
-			];
+				'name'             => $result['name'] . (($result['return_status_id'] == $this->config->get('config_return_status_id')) ? $this->language->get('text_default') : null),
+				'edit'             => $this->url->link('localisation/return_status/edit', 'user_token=' . $this->session->data['user_token'] . '&return_status_id=' . $result['return_status_id'] . $url, true)
+			);
 		}
 
 		if (isset($this->error['warning'])) {
@@ -197,7 +196,7 @@ class ReturnStatus extends \Opencart\System\Engine\Controller {
 		if (isset($this->request->post['selected'])) {
 			$data['selected'] = (array)$this->request->post['selected'];
 		} else {
-			$data['selected'] = [];
+			$data['selected'] = array();
 		}
 
 		$url = '';
@@ -212,7 +211,7 @@ class ReturnStatus extends \Opencart\System\Engine\Controller {
 			$url .= '&page=' . $this->request->get['page'];
 		}
 
-		$data['sort_name'] = $this->url->link('localisation/return_status', 'user_token=' . $this->session->data['user_token'] . '&sort=name' . $url);
+		$data['sort_name'] = $this->url->link('localisation/return_status', 'user_token=' . $this->session->data['user_token'] . '&sort=name' . $url, true);
 
 		$url = '';
 
@@ -224,14 +223,15 @@ class ReturnStatus extends \Opencart\System\Engine\Controller {
 			$url .= '&order=' . $this->request->get['order'];
 		}
 
-		$data['pagination'] = $this->load->controller('common/pagination', [
-			'total' => $return_status_total,
-			'page'  => $page,
-			'limit' => $this->config->get('config_pagination_admin'),
-			'url'   => $this->url->link('localisation/return_status', 'user_token=' . $this->session->data['user_token'] . $url . '&page={page}')
-		]);
+		$pagination = new Pagination();
+		$pagination->total = $return_status_total;
+		$pagination->page = $page;
+		$pagination->limit = $this->config->get('config_limit_admin');
+		$pagination->url = $this->url->link('localisation/return_status', 'user_token=' . $this->session->data['user_token'] . $url . '&page={page}', true);
 
-		$data['results'] = sprintf($this->language->get('text_pagination'), ($return_status_total) ? (($page - 1) * $this->config->get('config_pagination_admin')) + 1 : 0, ((($page - 1) * $this->config->get('config_pagination_admin')) > ($return_status_total - $this->config->get('config_pagination_admin'))) ? $return_status_total : ((($page - 1) * $this->config->get('config_pagination_admin')) + $this->config->get('config_pagination_admin')), $return_status_total, ceil($return_status_total / $this->config->get('config_pagination_admin')));
+		$data['pagination'] = $pagination->render();
+
+		$data['results'] = sprintf($this->language->get('text_pagination'), ($return_status_total) ? (($page - 1) * $this->config->get('config_limit_admin')) + 1 : 0, ((($page - 1) * $this->config->get('config_limit_admin')) > ($return_status_total - $this->config->get('config_limit_admin'))) ? $return_status_total : ((($page - 1) * $this->config->get('config_limit_admin')) + $this->config->get('config_limit_admin')), $return_status_total, ceil($return_status_total / $this->config->get('config_limit_admin')));
 
 		$data['sort'] = $sort;
 		$data['order'] = $order;
@@ -255,7 +255,7 @@ class ReturnStatus extends \Opencart\System\Engine\Controller {
 		if (isset($this->error['name'])) {
 			$data['error_name'] = $this->error['name'];
 		} else {
-			$data['error_name'] = [];
+			$data['error_name'] = array();
 		}
 
 		$url = '';
@@ -272,25 +272,25 @@ class ReturnStatus extends \Opencart\System\Engine\Controller {
 			$url .= '&page=' . $this->request->get['page'];
 		}
 
-		$data['breadcrumbs'] = [];
+		$data['breadcrumbs'] = array();
 
-		$data['breadcrumbs'][] = [
+		$data['breadcrumbs'][] = array(
 			'text' => $this->language->get('text_home'),
-			'href' => $this->url->link('common/dashboard', 'user_token=' . $this->session->data['user_token'])
-		];
+			'href' => $this->url->link('common/dashboard', 'user_token=' . $this->session->data['user_token'], true)
+		);
 
-		$data['breadcrumbs'][] = [
+		$data['breadcrumbs'][] = array(
 			'text' => $this->language->get('heading_title'),
-			'href' => $this->url->link('localisation/return_status', 'user_token=' . $this->session->data['user_token'] . $url)
-		];
+			'href' => $this->url->link('localisation/return_status', 'user_token=' . $this->session->data['user_token'] . $url, true)
+		);
 
 		if (!isset($this->request->get['return_status_id'])) {
-			$data['action'] = $this->url->link('localisation/return_status|add', 'user_token=' . $this->session->data['user_token'] . $url);
+			$data['action'] = $this->url->link('localisation/return_status/add', 'user_token=' . $this->session->data['user_token'] . $url, true);
 		} else {
-			$data['action'] = $this->url->link('localisation/return_status|edit', 'user_token=' . $this->session->data['user_token'] . '&return_status_id=' . $this->request->get['return_status_id'] . $url);
+			$data['action'] = $this->url->link('localisation/return_status/edit', 'user_token=' . $this->session->data['user_token'] . '&return_status_id=' . $this->request->get['return_status_id'] . $url, true);
 		}
 
-		$data['cancel'] = $this->url->link('localisation/return_status', 'user_token=' . $this->session->data['user_token'] . $url);
+		$data['cancel'] = $this->url->link('localisation/return_status', 'user_token=' . $this->session->data['user_token'] . $url, true);
 
 		$this->load->model('localisation/language');
 
@@ -299,9 +299,9 @@ class ReturnStatus extends \Opencart\System\Engine\Controller {
 		if (isset($this->request->post['return_status'])) {
 			$data['return_status'] = $this->request->post['return_status'];
 		} elseif (isset($this->request->get['return_status_id'])) {
-			$data['return_status'] = $this->model_localisation_return_status->getDescriptions($this->request->get['return_status_id']);
+			$data['return_status'] = $this->model_localisation_return_status->getReturnStatusDescriptions($this->request->get['return_status_id']);
 		} else {
-			$data['return_status'] = [];
+			$data['return_status'] = array();
 		}
 
 		$data['header'] = $this->load->controller('common/header');
@@ -330,20 +330,20 @@ class ReturnStatus extends \Opencart\System\Engine\Controller {
 			$this->error['warning'] = $this->language->get('error_permission');
 		}
 
-		$this->load->model('sale/returns');
+		$this->load->model('sale/return');
 
 		foreach ($this->request->post['selected'] as $return_status_id) {
 			if ($this->config->get('config_return_status_id') == $return_status_id) {
 				$this->error['warning'] = $this->language->get('error_default');
 			}
 
-			$return_total = $this->model_sale_returns->getTotalReturnsByReturnStatusId($return_status_id);
+			$return_total = $this->model_sale_return->getTotalReturnsByReturnStatusId($return_status_id);
 
 			if ($return_total) {
 				$this->error['warning'] = sprintf($this->language->get('error_return'), $return_total);
 			}
 
-			$return_total = $this->model_sale_returns->getTotalHistoriesByReturnStatusId($return_status_id);
+			$return_total = $this->model_sale_return->getTotalReturnHistoriesByReturnStatusId($return_status_id);
 
 			if ($return_total) {
 				$this->error['warning'] = sprintf($this->language->get('error_return'), $return_total);

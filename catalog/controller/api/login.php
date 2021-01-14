@@ -1,21 +1,24 @@
 <?php
-namespace Opencart\Application\Controller\Api;
-class Login extends \Opencart\System\Engine\Controller {
+class ControllerApiLogin extends Controller {
 	public function index() {
 		$this->load->language('api/login');
 
-		$json = [];
+		$json = array();
 
 		$this->load->model('account/api');
 
 		// Login with API Key
-		$api_info = $this->model_account_api->login($this->request->post['username'], $this->request->post['key']);
+		if(isset($this->request->post['username'])) {
+			$api_info = $this->model_account_api->login($this->request->post['username'], $this->request->post['key']);
+		} else {
+			$api_info = $this->model_account_api->login('Default', $this->request->post['key']);
+		}
 
 		if ($api_info) {
 			// Check if IP is allowed
-			$ip_data = [];
+			$ip_data = array();
 	
-			$results = $this->model_account_api->getIps($api_info['api_id']);
+			$results = $this->model_account_api->getApiIps($api_info['api_id']);
 	
 			foreach ($results as $result) {
 				$ip_data[] = trim($result['ip']);
@@ -27,11 +30,12 @@ class Login extends \Opencart\System\Engine\Controller {
 				
 			if (!$json) {
 				$json['success'] = $this->language->get('text_success');
-
-				$session = new \Opencart\System\Library\Session($this->config->get('session_engine'), $this->registry);
+				
+				$session = new Session($this->config->get('session_engine'), $this->registry);
+				
 				$session->start();
 				
-				$this->model_account_api->addSession($api_info['api_id'], $session->getId(), $this->request->server['REMOTE_ADDR']);
+				$this->model_account_api->addApiSession($api_info['api_id'], $session->getId(), $this->request->server['REMOTE_ADDR']);
 				
 				$session->data['api_id'] = $api_info['api_id'];
 				

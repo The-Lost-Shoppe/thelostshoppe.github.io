@@ -1,6 +1,5 @@
 <?php
-namespace Opencart\Application\Controller\Api;
-class Shipping extends \Opencart\System\Engine\Controller {
+class ControllerApiShipping extends Controller {
 	public function address() {
 		$this->load->language('api/shipping');
 
@@ -9,14 +8,14 @@ class Shipping extends \Opencart\System\Engine\Controller {
 		unset($this->session->data['shipping_methods']);
 		unset($this->session->data['shipping_method']);
 
-		$json = [];
+		$json = array();
 
 		if ($this->cart->hasShipping()) {
 			if (!isset($this->session->data['api_id'])) {
 				$json['error']['warning'] = $this->language->get('error_permission');
 			} else {
 				// Add keys for missing post vars
-				$keys = [
+				$keys = array(
 					'firstname',
 					'lastname',
 					'company',
@@ -26,7 +25,7 @@ class Shipping extends \Opencart\System\Engine\Controller {
 					'city',
 					'zone_id',
 					'country_id'
-				];
+				);
 
 				foreach ($keys as $key) {
 					if (!isset($this->request->post[$key])) {
@@ -73,9 +72,9 @@ class Shipping extends \Opencart\System\Engine\Controller {
 
 				foreach ($custom_fields as $custom_field) {
 					if ($custom_field['location'] == 'address') {
-						if ($custom_field['required'] && empty($this->request->post['custom_field'][$custom_field['custom_field_id']])) {
+						if ($custom_field['required'] && empty($this->request->post['custom_field'][$custom_field['location']][$custom_field['custom_field_id']])) {
 							$json['error']['custom_field' . $custom_field['custom_field_id']] = sprintf($this->language->get('error_custom_field'), $custom_field['name']);
-						} elseif (($custom_field['type'] == 'text') && !empty($custom_field['validation']) && !filter_var($this->request->post['custom_field'][$custom_field['custom_field_id']], FILTER_VALIDATE_REGEXP, ['options' => ['regexp' => '/' . html_entity_decode($custom_field['validation'], ENT_QUOTES, 'UTF-8') . '/']])) {
+						} elseif (($custom_field['type'] == 'text') && !empty($custom_field['validation']) && !filter_var($this->request->post['custom_field'][$custom_field['location']][$custom_field['custom_field_id']], FILTER_VALIDATE_REGEXP, array('options' => array('regexp' => $custom_field['validation'])))) {
 							$json['error']['custom_field' . $custom_field['custom_field_id']] = sprintf($this->language->get('error_custom_field'), $custom_field['name']);
 						}
 					}
@@ -110,7 +109,7 @@ class Shipping extends \Opencart\System\Engine\Controller {
 						$zone_code = '';
 					}
 
-					$this->session->data['shipping_address'] = [
+					$this->session->data['shipping_address'] = array(
 						'firstname'      => $this->request->post['firstname'],
 						'lastname'       => $this->request->post['lastname'],
 						'company'        => $this->request->post['company'],
@@ -126,8 +125,8 @@ class Shipping extends \Opencart\System\Engine\Controller {
 						'iso_code_2'     => $iso_code_2,
 						'iso_code_3'     => $iso_code_3,
 						'address_format' => $address_format,
-						'custom_field'   => isset($this->request->post['custom_field']) ? $this->request->post['custom_field'] : []
-					];
+						'custom_field'   => isset($this->request->post['custom_field']) ? $this->request->post['custom_field'] : array()
+					);
 
 					$json['success'] = $this->language->get('text_address');
 
@@ -136,7 +135,7 @@ class Shipping extends \Opencart\System\Engine\Controller {
 				}
 			}
 		}
-
+		
 		$this->response->addHeader('Content-Type: application/json');
 		$this->response->setOutput(json_encode($json));
 	}
@@ -148,7 +147,7 @@ class Shipping extends \Opencart\System\Engine\Controller {
 		unset($this->session->data['shipping_methods']);
 		unset($this->session->data['shipping_method']);
 
-		$json = [];
+		$json = array();
 
 		if (!isset($this->session->data['api_id'])) {
 			$json['error'] = $this->language->get('error_permission');
@@ -159,30 +158,30 @@ class Shipping extends \Opencart\System\Engine\Controller {
 
 			if (!$json) {
 				// Shipping Methods
-				$json['shipping_methods'] = [];
+				$json['shipping_methods'] = array();
 
 				$this->load->model('setting/extension');
 
-				$results = $this->model_setting_extension->getExtensionsByType('shipping');
+				$results = $this->model_setting_extension->getExtensions('shipping');
 
 				foreach ($results as $result) {
 					if ($this->config->get('shipping_' . $result['code'] . '_status')) {
-						$this->load->model('extension/' . $result['extension'] . '/shipping/' . $result['code']);
+						$this->load->model('extension/shipping/' . $result['code']);
 
-						$quote = $this->{'model_extension_' . $result['extension'] . '_shipping_' . $result['code']}->getQuote($this->session->data['shipping_address']);
+						$quote = $this->{'model_extension_shipping_' . $result['code']}->getQuote($this->session->data['shipping_address']);
 
 						if ($quote) {
-							$json['shipping_methods'][$result['code']] = [
+							$json['shipping_methods'][$result['code']] = array(
 								'title'      => $quote['title'],
 								'quote'      => $quote['quote'],
 								'sort_order' => $quote['sort_order'],
 								'error'      => $quote['error']
-							];
+							);
 						}
 					}
 				}
 
-				$sort_order = [];
+				$sort_order = array();
 
 				foreach ($json['shipping_methods'] as $key => $value) {
 					$sort_order[$key] = $value['sort_order'];
@@ -197,7 +196,7 @@ class Shipping extends \Opencart\System\Engine\Controller {
 				}
 			}
 		} else {
-			$json['shipping_methods'] = [];
+			$json['shipping_methods'] = array();
 		}
 
 		$this->response->addHeader('Content-Type: application/json');
@@ -210,7 +209,7 @@ class Shipping extends \Opencart\System\Engine\Controller {
 		// Delete old shipping method so not to cause any issues if there is an error
 		unset($this->session->data['shipping_method']);
 
-		$json = [];
+		$json = array();
 
 		if (!isset($this->session->data['api_id'])) {
 			$json['error'] = $this->language->get('error_permission');

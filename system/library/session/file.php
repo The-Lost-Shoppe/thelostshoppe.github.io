@@ -1,45 +1,37 @@
 <?php
-namespace Opencart\System\Library\Session;
+namespace Session;
 class File {
-	public function __construct($registry) {
-		$this->config = $registry->get('config');
-	}
+	private $directory;
 
 	public function read($session_id) {
-		$file = DIR_SESSION . 'sess_' . basename($session_id);
+		$file = DIR_SESSION . '/sess_' . basename($session_id);
 
 		if (is_file($file)) {
-			$size = filesize($file);
+			$handle = fopen($file, 'r');
 
-			if ($size) {
-				$handle = fopen($file, 'r');
+			flock($handle, LOCK_SH);
 
-				flock($handle, LOCK_SH);
+			$data = fread($handle, filesize($file));
 
-				$data = fread($handle, $size);
+			flock($handle, LOCK_UN);
 
-				flock($handle, LOCK_UN);
+			fclose($handle);
 
-				fclose($handle);
-
-				return json_decode($data, true);
-			} else {
-				return [];
-			}
+			return unserialize($data);
+		} else {
+			return array();
 		}
-
-		return [];
 	}
 
 	public function write($session_id, $data) {
-		$file = DIR_SESSION . 'sess_' . basename($session_id);
+		$file = DIR_SESSION . '/sess_' . basename($session_id);
 
-		$handle = fopen($file, 'c');
+		$handle = fopen($file, 'w');
 
 		flock($handle, LOCK_EX);
 
-		fwrite($handle, json_encode($data));
-		ftruncate($handle, ftell($handle));
+		fwrite($handle, serialize($data));
+
 		fflush($handle);
 
 		flock($handle, LOCK_UN);
@@ -50,21 +42,33 @@ class File {
 	}
 
 	public function destroy($session_id) {
-		$file = DIR_SESSION . 'sess_' . basename($session_id);
+		$file = DIR_SESSION . '/sess_' . basename($session_id);
 
 		if (is_file($file)) {
 			unlink($file);
 		}
 	}
 
-	public function gc() {
-		if (round(rand(1, $this->config->get('session_divisor') / $this->config->get('session_probability'))) == 1) {
-			$expire = time() - $this->config->get('session_expire');
+	public function __destruct() {
+		if (ini_get('session.gc_divisor')) {
+			$gc_divisor = ini_get('session.gc_divisor');
+		} else {
+			$gc_divisor = 1;
+		}
 
-			$files = glob(DIR_SESSION . 'sess_*');
+		if (ini_get('session.gc_probability')) {
+			$gc_probability = ini_get('session.gc_probability');
+		} else {
+			$gc_probability = 1;
+		}
+
+		if ((rand() % $gc_divisor) < $gc_probability) {
+			$expire = time() - ini_get('session.gc_maxlifetime');
+
+			$files = glob(DIR_SESSION . '/sess_*');
 
 			foreach ($files as $file) {
-				if (is_file($file) && filemtime($file) > $expire) {
+				if (filemtime($file) < $expire) {
 					unlink($file);
 				}
 			}

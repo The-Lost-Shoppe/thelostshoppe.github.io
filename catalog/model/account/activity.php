@@ -1,6 +1,5 @@
 <?php
-namespace Opencart\Application\Model\Account;
-class Activity extends \Opencart\System\Engine\Model {
+class ModelAccountActivity extends Model {
 	public function addActivity($key, $data) {
 		if (isset($data['customer_id'])) {
 			$customer_id = $data['customer_id'];

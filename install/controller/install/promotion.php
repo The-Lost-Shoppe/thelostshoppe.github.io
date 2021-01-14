@@ -1,6 +1,5 @@
 <?php
-namespace Opencart\Application\Controller\Install;
-class Promotion extends \Opencart\System\Engine\Controller {
+class ControllerInstallPromotion extends Controller {
 	public function index() {
 		$curl = curl_init();
 

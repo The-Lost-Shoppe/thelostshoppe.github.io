@@ -1,7 +1,6 @@
 <?php
-namespace Opencart\Application\Controller\Localisation;
-class ReturnReason extends \Opencart\System\Engine\Controller {
-	private $error = [];
+class ControllerLocalisationReturnReason extends Controller {
+	private $error = array();
 
 	public function index() {
 		$this->load->language('localisation/return_reason');
@@ -39,7 +38,7 @@ class ReturnReason extends \Opencart\System\Engine\Controller {
 				$url .= '&page=' . $this->request->get['page'];
 			}
 
-			$this->response->redirect($this->url->link('localisation/return_reason', 'user_token=' . $this->session->data['user_token'] . $url));
+			$this->response->redirect($this->url->link('localisation/return_reason', 'user_token=' . $this->session->data['user_token'] . $url, true));
 		}
 
 		$this->getForm();
@@ -71,7 +70,7 @@ class ReturnReason extends \Opencart\System\Engine\Controller {
 				$url .= '&page=' . $this->request->get['page'];
 			}
 
-			$this->response->redirect($this->url->link('localisation/return_reason', 'user_token=' . $this->session->data['user_token'] . $url));
+			$this->response->redirect($this->url->link('localisation/return_reason', 'user_token=' . $this->session->data['user_token'] . $url, true));
 		}
 
 		$this->getForm();
@@ -105,7 +104,7 @@ class ReturnReason extends \Opencart\System\Engine\Controller {
 				$url .= '&page=' . $this->request->get['page'];
 			}
 
-			$this->response->redirect($this->url->link('localisation/return_reason', 'user_token=' . $this->session->data['user_token'] . $url));
+			$this->response->redirect($this->url->link('localisation/return_reason', 'user_token=' . $this->session->data['user_token'] . $url, true));
 		}
 
 		$this->getList();
@@ -125,7 +124,7 @@ class ReturnReason extends \Opencart\System\Engine\Controller {
 		}
 
 		if (isset($this->request->get['page'])) {
-			$page = (int)$this->request->get['page'];
+			$page = $this->request->get['page'];
 		} else {
 			$page = 1;
 		}
@@ -144,40 +143,40 @@ class ReturnReason extends \Opencart\System\Engine\Controller {
 			$url .= '&page=' . $this->request->get['page'];
 		}
 
-		$data['breadcrumbs'] = [];
+		$data['breadcrumbs'] = array();
 
-		$data['breadcrumbs'][] = [
+		$data['breadcrumbs'][] = array(
 			'text' => $this->language->get('text_home'),
-			'href' => $this->url->link('common/dashboard', 'user_token=' . $this->session->data['user_token'])
-		];
+			'href' => $this->url->link('common/dashboard', 'user_token=' . $this->session->data['user_token'], true)
+		);
 
-		$data['breadcrumbs'][] = [
+		$data['breadcrumbs'][] = array(
 			'text' => $this->language->get('heading_title'),
-			'href' => $this->url->link('localisation/return_reason', 'user_token=' . $this->session->data['user_token'] . $url)
-		];
+			'href' => $this->url->link('localisation/return_reason', 'user_token=' . $this->session->data['user_token'] . $url, true)
+		);
 
-		$data['add'] = $this->url->link('localisation/return_reason|add', 'user_token=' . $this->session->data['user_token'] . $url);
-		$data['delete'] = $this->url->link('localisation/return_reason|delete', 'user_token=' . $this->session->data['user_token'] . $url);
+		$data['add'] = $this->url->link('localisation/return_reason/add', 'user_token=' . $this->session->data['user_token'] . $url, true);
+		$data['delete'] = $this->url->link('localisation/return_reason/delete', 'user_token=' . $this->session->data['user_token'] . $url, true);
 
-		$data['return_reasons'] = [];
+		$data['return_reasons'] = array();
 
-		$filter_data = [
+		$filter_data = array(
 			'sort'  => $sort,
 			'order' => $order,
-			'start' => ($page - 1) * $this->config->get('config_pagination_admin'),
-			'limit' => $this->config->get('config_pagination_admin')
-		];
+			'start' => ($page - 1) * $this->config->get('config_limit_admin'),
+			'limit' => $this->config->get('config_limit_admin')
+		);
 
 		$return_reason_total = $this->model_localisation_return_reason->getTotalReturnReasons();
 
 		$results = $this->model_localisation_return_reason->getReturnReasons($filter_data);
 
 		foreach ($results as $result) {
-			$data['return_reasons'][] = [
+			$data['return_reasons'][] = array(
 				'return_reason_id' => $result['return_reason_id'],
 				'name'             => $result['name'],
-				'edit'             => $this->url->link('localisation/return_reason|edit', 'user_token=' . $this->session->data['user_token'] . '&return_reason_id=' . $result['return_reason_id'] . $url)
-			];
+				'edit'             => $this->url->link('localisation/return_reason/edit', 'user_token=' . $this->session->data['user_token'] . '&return_reason_id=' . $result['return_reason_id'] . $url, true)
+			);
 		}
 
 		if (isset($this->error['warning'])) {
@@ -197,7 +196,7 @@ class ReturnReason extends \Opencart\System\Engine\Controller {
 		if (isset($this->request->post['selected'])) {
 			$data['selected'] = (array)$this->request->post['selected'];
 		} else {
-			$data['selected'] = [];
+			$data['selected'] = array();
 		}
 
 		$url = '';
@@ -212,7 +211,7 @@ class ReturnReason extends \Opencart\System\Engine\Controller {
 			$url .= '&page=' . $this->request->get['page'];
 		}
 
-		$data['sort_name'] = $this->url->link('localisation/return_reason', 'user_token=' . $this->session->data['user_token'] . '&sort=name' . $url);
+		$data['sort_name'] = $this->url->link('localisation/return_reason', 'user_token=' . $this->session->data['user_token'] . '&sort=name' . $url, true);
 
 		$url = '';
 
@@ -224,14 +223,15 @@ class ReturnReason extends \Opencart\System\Engine\Controller {
 			$url .= '&order=' . $this->request->get['order'];
 		}
 
-		$data['pagination'] = $this->load->controller('common/pagination', [
-			'total' => $return_reason_total,
-			'page'  => $page,
-			'limit' => $this->config->get('config_pagination_admin'),
-			'url'   => $this->url->link('localisation/return_reason', 'user_token=' . $this->session->data['user_token'] . $url . '&page={page}')
-		]);
+		$pagination = new Pagination();
+		$pagination->total = $return_reason_total;
+		$pagination->page = $page;
+		$pagination->limit = $this->config->get('config_limit_admin');
+		$pagination->url = $this->url->link('localisation/return_reason', 'user_token=' . $this->session->data['user_token'] . $url . '&page={page}', true);
 
-		$data['results'] = sprintf($this->language->get('text_pagination'), ($return_reason_total) ? (($page - 1) * $this->config->get('config_pagination_admin')) + 1 : 0, ((($page - 1) * $this->config->get('config_pagination_admin')) > ($return_reason_total - $this->config->get('config_pagination_admin'))) ? $return_reason_total : ((($page - 1) * $this->config->get('config_pagination_admin')) + $this->config->get('config_pagination_admin')), $return_reason_total, ceil($return_reason_total / $this->config->get('config_pagination_admin')));
+		$data['pagination'] = $pagination->render();
+
+		$data['results'] = sprintf($this->language->get('text_pagination'), ($return_reason_total) ? (($page - 1) * $this->config->get('config_limit_admin')) + 1 : 0, ((($page - 1) * $this->config->get('config_limit_admin')) > ($return_reason_total - $this->config->get('config_limit_admin'))) ? $return_reason_total : ((($page - 1) * $this->config->get('config_limit_admin')) + $this->config->get('config_limit_admin')), $return_reason_total, ceil($return_reason_total / $this->config->get('config_limit_admin')));
 
 		$data['sort'] = $sort;
 		$data['order'] = $order;
@@ -255,7 +255,7 @@ class ReturnReason extends \Opencart\System\Engine\Controller {
 		if (isset($this->error['name'])) {
 			$data['error_name'] = $this->error['name'];
 		} else {
-			$data['error_name'] = [];
+			$data['error_name'] = array();
 		}
 
 		$url = '';
@@ -272,25 +272,25 @@ class ReturnReason extends \Opencart\System\Engine\Controller {
 			$url .= '&page=' . $this->request->get['page'];
 		}
 
-		$data['breadcrumbs'] = [];
+		$data['breadcrumbs'] = array();
 
-		$data['breadcrumbs'][] = [
+		$data['breadcrumbs'][] = array(
 			'text' => $this->language->get('text_home'),
-			'href' => $this->url->link('common/dashboard', 'user_token=' . $this->session->data['user_token'])
-		];
+			'href' => $this->url->link('common/dashboard', 'user_token=' . $this->session->data['user_token'], true)
+		);
 
-		$data['breadcrumbs'][] = [
+		$data['breadcrumbs'][] = array(
 			'text' => $this->language->get('heading_title'),
-			'href' => $this->url->link('localisation/return_reason', 'user_token=' . $this->session->data['user_token'] . $url)
-		];
+			'href' => $this->url->link('localisation/return_reason', 'user_token=' . $this->session->data['user_token'] . $url, true)
+		);
 
 		if (!isset($this->request->get['return_reason_id'])) {
-			$data['action'] = $this->url->link('localisation/return_reason|add', 'user_token=' . $this->session->data['user_token'] . $url);
+			$data['action'] = $this->url->link('localisation/return_reason/add', 'user_token=' . $this->session->data['user_token'] . $url, true);
 		} else {
-			$data['action'] = $this->url->link('localisation/return_reason|edit', 'user_token=' . $this->session->data['user_token'] . '&return_reason_id=' . $this->request->get['return_reason_id'] . $url);
+			$data['action'] = $this->url->link('localisation/return_reason/edit', 'user_token=' . $this->session->data['user_token'] . '&return_reason_id=' . $this->request->get['return_reason_id'] . $url, true);
 		}
 
-		$data['cancel'] = $this->url->link('localisation/return_reason', 'user_token=' . $this->session->data['user_token'] . $url);
+		$data['cancel'] = $this->url->link('localisation/return_reason', 'user_token=' . $this->session->data['user_token'] . $url, true);
 
 		$this->load->model('localisation/language');
 
@@ -299,9 +299,9 @@ class ReturnReason extends \Opencart\System\Engine\Controller {
 		if (isset($this->request->post['return_reason'])) {
 			$data['return_reason'] = $this->request->post['return_reason'];
 		} elseif (isset($this->request->get['return_reason_id'])) {
-			$data['return_reason'] = $this->model_localisation_return_reason->getDescriptions($this->request->get['return_reason_id']);
+			$data['return_reason'] = $this->model_localisation_return_reason->getReturnReasonDescriptions($this->request->get['return_reason_id']);
 		} else {
-			$data['return_reason'] = [];
+			$data['return_reason'] = array();
 		}
 
 		$data['header'] = $this->load->controller('common/header');
@@ -330,10 +330,10 @@ class ReturnReason extends \Opencart\System\Engine\Controller {
 			$this->error['warning'] = $this->language->get('error_permission');
 		}
 
-		$this->load->model('sale/returns');
+		$this->load->model('sale/return');
 
 		foreach ($this->request->post['selected'] as $return_reason_id) {
-			$return_total = $this->model_sale_returns->getTotalReturnsByReturnReasonId($return_reason_id);
+			$return_total = $this->model_sale_return->getTotalReturnsByReturnReasonId($return_reason_id);
 
 			if ($return_total) {
 				$this->error['warning'] = sprintf($this->language->get('error_return'), $return_total);

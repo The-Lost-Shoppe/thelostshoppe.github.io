@@ -1,13 +1,12 @@
 <?php
-namespace Opencart\Application\Controller\Account;
-class Password extends \Opencart\System\Engine\Controller {
-	private $error = [];
+class ControllerAccountPassword extends Controller {
+	private $error = array();
 
 	public function index() {
 		if (!$this->customer->isLogged()) {
-			$this->session->data['redirect'] = $this->url->link('account/password', 'language=' . $this->config->get('config_language'));
+			$this->session->data['redirect'] = $this->url->link('account/password', '', true);
 
-			$this->response->redirect($this->url->link('account/login', 'language=' . $this->config->get('config_language')));
+			$this->response->redirect($this->url->link('account/login', '', true));
 		}
 
 		$this->load->language('account/password');
@@ -21,25 +20,25 @@ class Password extends \Opencart\System\Engine\Controller {
 
 			$this->session->data['success'] = $this->language->get('text_success');
 
-			$this->response->redirect($this->url->link('account/account', 'language=' . $this->config->get('config_language')));
+			$this->response->redirect($this->url->link('account/account', '', true));
 		}
 
-		$data['breadcrumbs'] = [];
+		$data['breadcrumbs'] = array();
 
-		$data['breadcrumbs'][] = [
+		$data['breadcrumbs'][] = array(
 			'text' => $this->language->get('text_home'),
-			'href' => $this->url->link('common/home', 'language=' . $this->config->get('config_language'))
-		];
+			'href' => $this->url->link('common/home')
+		);
 
-		$data['breadcrumbs'][] = [
+		$data['breadcrumbs'][] = array(
 			'text' => $this->language->get('text_account'),
-			'href' => $this->url->link('account/account', 'language=' . $this->config->get('config_language'))
-		];
+			'href' => $this->url->link('account/account', '', true)
+		);
 
-		$data['breadcrumbs'][] = [
+		$data['breadcrumbs'][] = array(
 			'text' => $this->language->get('heading_title'),
-			'href' => $this->url->link('account/password', 'language=' . $this->config->get('config_language'))
-		];
+			'href' => $this->url->link('account/password', '', true)
+		);
 
 		if (isset($this->error['password'])) {
 			$data['error_password'] = $this->error['password'];
@@ -53,7 +52,7 @@ class Password extends \Opencart\System\Engine\Controller {
 			$data['error_confirm'] = '';
 		}
 
-		$data['action'] = $this->url->link('account/password', 'language=' . $this->config->get('config_language'));
+		$data['action'] = $this->url->link('account/password', '', true);
 
 		if (isset($this->request->post['password'])) {
 			$data['password'] = $this->request->post['password'];
@@ -67,7 +66,7 @@ class Password extends \Opencart\System\Engine\Controller {
 			$data['confirm'] = '';
 		}
 
-		$data['back'] = $this->url->link('account/account', 'language=' . $this->config->get('config_language'));
+		$data['back'] = $this->url->link('account/account', '', true);
 
 		$data['column_left'] = $this->load->controller('common/column_left');
 		$data['column_right'] = $this->load->controller('common/column_right');

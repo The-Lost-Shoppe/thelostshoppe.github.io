@@ -1,6 +1,5 @@
 <?php
-namespace Opencart\Application\Controller\Marketplace;
-class Api extends \Opencart\System\Engine\Controller {
+class ControllerMarketplaceApi extends Controller {
 	public function index() {	
 		$this->load->language('marketplace/api');
 			
@@ -12,7 +11,7 @@ class Api extends \Opencart\System\Engine\Controller {
 	public function save() {
 		$this->load->language('marketplace/api');
 
-		$json = [];
+		$json = array();
 		
 		if (!$this->user->hasPermission('modify', 'marketplace/api')) {
 			$json['error']['warning'] = $this->language->get('error_permission');

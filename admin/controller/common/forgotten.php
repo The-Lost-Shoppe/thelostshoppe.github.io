@@ -1,15 +1,14 @@
 <?php
-namespace Opencart\Application\Controller\Common;
-class Forgotten extends \Opencart\System\Engine\Controller {
-	private $error = [];
+class ControllerCommonForgotten extends Controller {
+	private $error = array();
 
 	public function index() {
 		if ($this->user->isLogged() && isset($this->request->get['user_token']) && ($this->request->get['user_token'] == $this->session->data['user_token'])) {
-			$this->response->redirect($this->url->link('common/dashboard'));
+			$this->response->redirect($this->url->link('common/dashboard', '', true));
 		}
 
 		if (!$this->config->get('config_password')) {
-			$this->response->redirect($this->url->link('common/login'));
+			$this->response->redirect($this->url->link('common/login', '', true));
 		}
 
 		$this->load->language('common/forgotten');
@@ -23,7 +22,7 @@ class Forgotten extends \Opencart\System\Engine\Controller {
 			
 			$this->session->data['success'] = $this->language->get('text_success');
 
-			$this->response->redirect($this->url->link('common/login'));
+			$this->response->redirect($this->url->link('common/login', '', true));
 		}
 
 		if (isset($this->error['warning'])) {
@@ -32,21 +31,21 @@ class Forgotten extends \Opencart\System\Engine\Controller {
 			$data['error_warning'] = '';
 		}
 
-		$data['breadcrumbs'] = [];
+		$data['breadcrumbs'] = array();
 
-		$data['breadcrumbs'][] = [
+		$data['breadcrumbs'][] = array(
 			'text' => $this->language->get('text_home'),
-			'href' => $this->url->link('common/dashboard')
-		];
+			'href' => $this->url->link('common/dashboard', '', true)
+		);
 
-		$data['breadcrumbs'][] = [
+		$data['breadcrumbs'][] = array(
 			'text' => $this->language->get('heading_title'),
-			'href' => $this->url->link('common/forgotten')
-		];
+			'href' => $this->url->link('common/forgotten', 'user_token=' . '', true)
+		);
 
-		$data['action'] = $this->url->link('common/forgotten');
+		$data['action'] = $this->url->link('common/forgotten', '', true);
 
-		$data['cancel'] = $this->url->link('common/login');
+		$data['cancel'] = $this->url->link('common/login', '', true);
 
 		if (isset($this->request->post['email'])) {
 			$data['email'] = $this->request->post['email'];

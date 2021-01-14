@@ -10,14 +10,13 @@
 /**
 * Event class
 *
-* Event System
+* Event System Userguide
 * 
 * https://github.com/opencart/opencart/wiki/Events-(script-notifications)-2.2.x.x
 */
-namespace Opencart\System\Engine;
 class Event {
 	protected $registry;
-	protected $data = [];
+	protected $data = array();
 	
 	/**
 	 * Constructor
@@ -36,13 +35,13 @@ class Event {
 	 * @param	int		$priority
  	*/	
 	public function register($trigger, Action $action, $priority = 0) {
-		$this->data[] = [
+		$this->data[] = array(
 			'trigger'  => $trigger,
 			'action'   => $action,
 			'priority' => $priority
-		];
+		);
 		
-		$sort_order = [];
+		$sort_order = array();
 
 		foreach ($this->data as $key => $value) {
 			$sort_order[$key] = $value['priority'];
@@ -57,9 +56,9 @@ class Event {
 	 * @param	string	$event
 	 * @param	array	$args
  	*/		
-	public function trigger($event, array $args = []) {
+	public function trigger($event, array $args = array()) {
 		foreach ($this->data as $value) {
-			if (preg_match('/^' . str_replace(['\*', '\?'], ['.*', '.'], preg_quote($value['trigger'], '/')) . '/', $event)) {
+			if (preg_match('/^' . str_replace(array('\*', '\?'), array('.*', '.'), preg_quote($value['trigger'], '/')) . '/', $event)) {
 				$result = $value['action']->execute($this->registry, $args);
 
 				if (!is_null($result) && !($result instanceof Exception)) {

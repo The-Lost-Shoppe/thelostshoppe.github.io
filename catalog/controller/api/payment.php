@@ -1,6 +1,5 @@
 <?php
-namespace Opencart\Application\Controller\Api;
-class Payment extends \Opencart\System\Engine\Controller {
+class ControllerApiPayment extends Controller {
 	public function address() {
 		$this->load->language('api/payment');
 
@@ -9,13 +8,13 @@ class Payment extends \Opencart\System\Engine\Controller {
 		unset($this->session->data['payment_methods']);
 		unset($this->session->data['payment_method']);
 
-		$json = [];
+		$json = array();
 
 		if (!isset($this->session->data['api_id'])) {
 			$json['error']['warning'] = $this->language->get('error_permission');
 		} else {
 			// Add keys for missing post vars
-			$keys = [
+			$keys = array(
 				'firstname',
 				'lastname',
 				'company',
@@ -25,7 +24,7 @@ class Payment extends \Opencart\System\Engine\Controller {
 				'city',
 				'zone_id',
 				'country_id'
-			];
+			);
 
 			foreach ($keys as $key) {
 				if (!isset($this->request->post[$key])) {
@@ -72,9 +71,9 @@ class Payment extends \Opencart\System\Engine\Controller {
 
 			foreach ($custom_fields as $custom_field) {
 				if ($custom_field['location'] == 'address') {
-					if ($custom_field['required'] && empty($this->request->post['custom_field'][$custom_field['custom_field_id']])) {
+					if ($custom_field['required'] && empty($this->request->post['custom_field'][$custom_field['location']][$custom_field['custom_field_id']])) {
 						$json['error']['custom_field' . $custom_field['custom_field_id']] = sprintf($this->language->get('error_custom_field'), $custom_field['name']);
-					} elseif (($custom_field['type'] == 'text') && !empty($custom_field['validation']) && !filter_var($this->request->post['custom_field'][$custom_field['custom_field_id']], FILTER_VALIDATE_REGEXP, ['options' => ['regexp' => '/' . html_entity_decode($custom_field['validation'], ENT_QUOTES, 'UTF-8') . '/']])) {
+					} elseif (($custom_field['type'] == 'text') && !empty($custom_field['validation']) && !filter_var($this->request->post['custom_field'][$custom_field['location']][$custom_field['custom_field_id']], FILTER_VALIDATE_REGEXP, array('options' => array('regexp' => $custom_field['validation'])))) {
 						$json['error']['custom_field' . $custom_field['custom_field_id']] = sprintf($this->language->get('error_custom_field'), $custom_field['name']);
 					}
 				}
@@ -109,7 +108,7 @@ class Payment extends \Opencart\System\Engine\Controller {
 					$zone_code = '';
 				}
 
-				$this->session->data['payment_address'] = [
+				$this->session->data['payment_address'] = array(
 					'firstname'      => $this->request->post['firstname'],
 					'lastname'       => $this->request->post['lastname'],
 					'company'        => $this->request->post['company'],
@@ -125,11 +124,11 @@ class Payment extends \Opencart\System\Engine\Controller {
 					'iso_code_2'     => $iso_code_2,
 					'iso_code_3'     => $iso_code_3,
 					'address_format' => $address_format,
-					'custom_field'   => isset($this->request->post['custom_field']) ? $this->request->post['custom_field'] : []
-				];
+					'custom_field'   => isset($this->request->post['custom_field']) ? $this->request->post['custom_field'] : array()
+				);
 
 				$json['success'] = $this->language->get('text_address');
-
+				
 				unset($this->session->data['payment_method']);
 				unset($this->session->data['payment_methods']);
 			}
@@ -141,12 +140,12 @@ class Payment extends \Opencart\System\Engine\Controller {
 
 	public function methods() {
 		$this->load->language('api/payment');
-
+		
 		// Delete past shipping methods and method just in case there is an error
 		unset($this->session->data['payment_methods']);
 		unset($this->session->data['payment_method']);
 
-		$json = [];
+		$json = array();
 
 		if (!isset($this->session->data['api_id'])) {
 			$json['error'] = $this->language->get('error_permission');
@@ -155,18 +154,25 @@ class Payment extends \Opencart\System\Engine\Controller {
 			if (!isset($this->session->data['payment_address'])) {
 				$json['error'] = $this->language->get('error_address');
 			}
-
+			
 			if (!$json) {
 				// Totals
-				$totals = [];
+				$totals = array();
 				$taxes = $this->cart->getTaxes();
 				$total = 0;
 
+				// Because __call can not keep var references so we put them into an array. 
+				$total_data = array(
+					'totals' => &$totals,
+					'taxes'  => &$taxes,
+					'total'  => &$total
+				);
+
 				$this->load->model('setting/extension');
 
-				$sort_order = [];
+				$sort_order = array();
 
-				$results = $this->model_setting_extension->getExtensionsByType('total');
+				$results = $this->model_setting_extension->getExtensions('total');
 
 				foreach ($results as $key => $value) {
 					$sort_order[$key] = $this->config->get('total_' . $value['code'] . '_sort_order');
@@ -176,27 +182,27 @@ class Payment extends \Opencart\System\Engine\Controller {
 
 				foreach ($results as $result) {
 					if ($this->config->get('total_' . $result['code'] . '_status')) {
-						$this->load->model('extension/' . $result['extension'] . '/total/' . $result['code']);
-
-						// __call can not pass-by-reference so we get PHP to call it as an anonymous function.
-						($this->{'model_extension_' . $result['extension'] . '_total_' . $result['code']}->getTotal)($totals, $taxes, $total);
+						$this->load->model('extension/total/' . $result['code']);
+						
+						// We have to put the totals in an array so that they pass by reference.
+						$this->{'model_extension_total_' . $result['code']}->getTotal($total_data);
 					}
 				}
 
 				// Payment Methods
-				$json['payment_methods'] = [];
+				$json['payment_methods'] = array();
 
 				$this->load->model('setting/extension');
 
-				$results = $this->model_setting_extension->getExtensionsByType('payment');
+				$results = $this->model_setting_extension->getExtensions('payment');
 
 				$recurring = $this->cart->hasRecurringProducts();
 
 				foreach ($results as $result) {
 					if ($this->config->get('payment_' . $result['code'] . '_status')) {
-						$this->load->model('extension/' . $result['extension'] . '/payment/' . $result['code']);
+						$this->load->model('extension/payment/' . $result['code']);
 
-						$method = $this->{'model_extension_' . $result['extension'] . '_payment_' . $result['code']}->getMethod($this->session->data['payment_address'], $total);
+						$method = $this->{'model_extension_payment_' . $result['code']}->getMethod($this->session->data['payment_address'], $total);
 
 						if ($method) {
 							if ($recurring) {
@@ -210,7 +216,7 @@ class Payment extends \Opencart\System\Engine\Controller {
 					}
 				}
 
-				$sort_order = [];
+				$sort_order = array();
 
 				foreach ($json['payment_methods'] as $key => $value) {
 					$sort_order[$key] = $value['sort_order'];
@@ -236,7 +242,7 @@ class Payment extends \Opencart\System\Engine\Controller {
 		// Delete old payment method so not to cause any issues if there is an error
 		unset($this->session->data['payment_method']);
 
-		$json = [];
+		$json = array();
 
 		if (!isset($this->session->data['api_id'])) {
 			$json['error'] = $this->language->get('error_permission');

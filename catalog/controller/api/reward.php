@@ -1,13 +1,12 @@
 <?php
-namespace Opencart\Application\Controller\Api;
-class Reward extends \Opencart\System\Engine\Controller {
+class ControllerApiReward extends Controller {
 	public function index() {
 		$this->load->language('api/reward');
 
 		// Delete past reward in case there is an error
 		unset($this->session->data['reward']);
 
-		$json = [];
+		$json = array();
 
 		if (!isset($this->session->data['api_id'])) {
 			$json['error'] = $this->language->get('error_permission');
@@ -48,7 +47,7 @@ class Reward extends \Opencart\System\Engine\Controller {
 	public function maximum() {
 		$this->load->language('api/reward');
 
-		$json = [];
+		$json = array();
 
 		if (!isset($this->session->data['api_id'])) {
 			$json['error'] = $this->language->get('error_permission');
@@ -69,7 +68,7 @@ class Reward extends \Opencart\System\Engine\Controller {
 	public function available() {
 		$this->load->language('api/reward');
 
-		$json = [];
+		$json = array();
 
 		if (!isset($this->session->data['api_id'])) {
 			$json['error'] = $this->language->get('error_permission');

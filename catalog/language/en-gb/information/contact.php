@@ -3,7 +3,7 @@
 $_['heading_title']  = 'Contact Us';
 
 // Text
-$_['text_location']  = 'Our Locations';
+$_['text_location']  = 'Our Location';
 $_['text_store']     = 'Our Stores';
 $_['text_contact']   = 'Contact Form';
 $_['text_address']   = 'Address';
@@ -11,7 +11,7 @@ $_['text_telephone'] = 'Telephone';
 $_['text_fax']       = 'Fax';
 $_['text_open']      = 'Opening Times';
 $_['text_comment']   = 'Comments';
-$_['text_message']   = '<p>Your enquiry has been successfully sent to the store owner!</p>';
+$_['text_success']   = '<p>Your enquiry has been successfully sent to the store owner!</p>';
 
 // Entry
 $_['entry_name']     = 'Your Name';

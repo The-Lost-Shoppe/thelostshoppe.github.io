@@ -10,8 +10,7 @@
 /**
 * Model class
 */
-namespace Opencart\System\Engine;
-class Model {
+abstract class Model {
 	protected $registry;
 
 	public function __construct($registry) {

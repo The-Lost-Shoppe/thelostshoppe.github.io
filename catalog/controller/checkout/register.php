@@ -1,12 +1,11 @@
 <?php
-namespace Opencart\Application\Controller\Checkout;
-class Register extends \Opencart\System\Engine\Controller {
+class ControllerCheckoutRegister extends Controller {
 	public function index() {
 		$this->load->language('checkout/checkout');
-
+		
 		$data['entry_newsletter'] = sprintf($this->language->get('entry_newsletter'), $this->config->get('config_name'));
 
-		$data['customer_groups'] = [];
+		$data['customer_groups'] = array();
 
 		if (is_array($this->config->get('config_customer_group_display'))) {
 			$this->load->model('account/customer_group');
@@ -50,12 +49,8 @@ class Register extends \Opencart\System\Engine\Controller {
 		$data['custom_fields'] = $this->model_account_custom_field->getCustomFields();
 
 		// Captcha
-		$this->load->model('setting/extension');
-
-		$extension_info = $this->model_setting_extension->getExtensionByCode('captcha', $this->config->get('config_captcha'));
-
-		if ($extension_info && $this->config->get('captcha_' . $this->config->get('config_captcha') . '_status') && in_array('register', (array)$this->config->get('config_captcha_page'))) {
-			$data['captcha'] = $this->load->controller('extension/'  . $extension_info['extension'] . '/captcha/' . $extension_info['code']);
+		if ($this->config->get('captcha_' . $this->config->get('config_captcha') . '_status') && in_array('register', (array)$this->config->get('config_captcha_page'))) {
+			$data['captcha'] = $this->load->controller('extension/captcha/' . $this->config->get('config_captcha'));
 		} else {
 			$data['captcha'] = '';
 		}
@@ -66,7 +61,7 @@ class Register extends \Opencart\System\Engine\Controller {
 			$information_info = $this->model_catalog_information->getInformation($this->config->get('config_account_id'));
 
 			if ($information_info) {
-				$data['text_agree'] = sprintf($this->language->get('text_agree'), $this->url->link('information/information|info', 'language=' . $this->config->get('config_language') . '&information_id=' . $this->config->get('config_account_id')), $information_info['title']);
+				$data['text_agree'] = sprintf($this->language->get('text_agree'), $this->url->link('information/information/agree', 'information_id=' . $this->config->get('config_account_id'), true), $information_info['title'], $information_info['title']);
 			} else {
 				$data['text_agree'] = '';
 			}
@@ -75,23 +70,23 @@ class Register extends \Opencart\System\Engine\Controller {
 		}
 
 		$data['shipping_required'] = $this->cart->hasShipping();
-
+		
 		$this->response->setOutput($this->load->view('checkout/register', $data));
 	}
 
 	public function save() {
 		$this->load->language('checkout/checkout');
 
-		$json = [];
+		$json = array();
 
 		// Validate if customer is already logged out.
 		if ($this->customer->isLogged()) {
-			$json['redirect'] = $this->url->link('checkout/checkout', 'language=' . $this->config->get('config_language'), true);
+			$json['redirect'] = $this->url->link('checkout/checkout', '', true);
 		}
 
 		// Validate cart has products and has stock.
 		if ((!$this->cart->hasProducts() && empty($this->session->data['vouchers'])) || (!$this->cart->hasStock() && !$this->config->get('config_stock_checkout'))) {
-			$json['redirect'] =  $this->url->link('checkout/cart', 'language=' . $this->config->get('config_language'), true);
+			$json['redirect'] = $this->url->link('checkout/cart');
 		}
 
 		// Validate minimum quantity requirements.
@@ -107,7 +102,7 @@ class Register extends \Opencart\System\Engine\Controller {
 			}
 
 			if ($product['minimum'] > $product_total) {
-				$json['redirect'] = $this->url->link('checkout/cart', 'language=' . $this->config->get('config_language'), true);
+				$json['redirect'] = $this->url->link('checkout/cart');
 
 				break;
 			}
@@ -193,18 +188,14 @@ class Register extends \Opencart\System\Engine\Controller {
 			foreach ($custom_fields as $custom_field) {
 				if ($custom_field['required'] && empty($this->request->post['custom_field'][$custom_field['location']][$custom_field['custom_field_id']])) {
 					$json['error']['custom_field' . $custom_field['custom_field_id']] = sprintf($this->language->get('error_custom_field'), $custom_field['name']);
-				} elseif (($custom_field['type'] == 'text') && !empty($custom_field['validation']) && !filter_var($this->request->post['custom_field'][$custom_field['location']][$custom_field['custom_field_id']], FILTER_VALIDATE_REGEXP, ['options' => ['regexp' => '/' . html_entity_decode($custom_field['validation'], ENT_QUOTES, 'UTF-8') . '/']])) {
+				} elseif (($custom_field['type'] == 'text') && !empty($custom_field['validation']) && !filter_var($this->request->post['custom_field'][$custom_field['location']][$custom_field['custom_field_id']], FILTER_VALIDATE_REGEXP, array('options' => array('regexp' => $custom_field['validation'])))) {
 					$json['error']['custom_field' . $custom_field['custom_field_id']] = sprintf($this->language->get('error_custom_field'), $custom_field['name']);
 				}
 			}
 
 			// Captcha
-			$this->load->model('setting/extension');
-
-			$extension_info = $this->model_setting_extension->getExtensionByCode('captcha', $this->config->get('config_captcha'));
-
-			if ($extension_info && $this->config->get('captcha_' . $this->config->get('config_captcha') . '_status') && in_array('register', (array)$this->config->get('config_captcha_page'))) {
-				$captcha = $this->load->controller('extension/'  . $extension_info['extension'] . '/captcha/' . $extension_info['code'] . '|validate');
+			if ($this->config->get('captcha_' . $this->config->get('config_captcha') . '_status') && in_array('register', (array)$this->config->get('config_captcha_page'))) {
+				$captcha = $this->load->controller('extension/captcha/' . $this->config->get('config_captcha') . '/validate');
 
 				if ($captcha) {
 					$json['error']['captcha'] = $captcha;
@@ -217,18 +208,17 @@ class Register extends \Opencart\System\Engine\Controller {
 
 			// Default Payment Address
 			$this->load->model('account/address');
-
+				
 			$address_id = $this->model_account_address->addAddress($customer_id, $this->request->post);
-
+			
 			// Set the address as default
 			$this->model_account_customer->editAddressId($customer_id, $address_id);
-
+			
 			// Clear any previous login attempts for unregistered accounts.
 			$this->model_account_customer->deleteLoginAttempts($this->request->post['email']);
 
 			$this->session->data['account'] = 'register';
 
-			// Customer groups
 			$this->load->model('account/customer_group');
 
 			$customer_group_info = $this->model_account_customer_group->getCustomerGroup($customer_group_id);
@@ -242,7 +232,7 @@ class Register extends \Opencart\System\Engine\Controller {
 					$this->session->data['shipping_address'] = $this->model_account_address->getAddress($this->customer->getAddressId());
 				}
 			} else {
-				$json['redirect'] = $this->url->link('account/success', 'language=' . $this->config->get('config_language'), true);
+				$json['redirect'] = $this->url->link('account/success');
 			}
 
 			unset($this->session->data['guest']);

@@ -1,8 +1,7 @@
 <?php
-namespace Opencart\Application\Model\Tool;
-class Image extends \Opencart\System\Engine\Model {
+class ModelToolImage extends Model {
 	public function resize($filename, $width, $height) {
-		if (!is_file(DIR_IMAGE . $filename) || get_path(DIR_IMAGE . $filename, DIR_IMAGE) != str_replace('\\', '/', DIR_IMAGE)) {
+		if (!is_file(DIR_IMAGE . $filename) || substr(str_replace('\\', '/', realpath(DIR_IMAGE . $filename)), 0, strlen(DIR_IMAGE)) != str_replace('\\', '/', DIR_IMAGE)) {
 			return;
 		}
 
@@ -14,10 +13,10 @@ class Image extends \Opencart\System\Engine\Model {
 		if (!is_file(DIR_IMAGE . $image_new) || (filemtime(DIR_IMAGE . $image_old) > filemtime(DIR_IMAGE . $image_new))) {
 			list($width_orig, $height_orig, $image_type) = getimagesize(DIR_IMAGE . $image_old);
 				 
-			if (!in_array($image_type, [IMAGETYPE_PNG, IMAGETYPE_JPEG, IMAGETYPE_GIF])) {
-				return HTTP_CATALOG . 'image/' . $image_old;
+			if (!in_array($image_type, array(IMAGETYPE_PNG, IMAGETYPE_JPEG, IMAGETYPE_GIF))) { 
+				return DIR_IMAGE . $image_old;
 			}
-
+ 
 			$path = '';
 
 			$directories = explode('/', dirname($image_new));
@@ -31,7 +30,7 @@ class Image extends \Opencart\System\Engine\Model {
 			}
 
 			if ($width_orig != $width || $height_orig != $height) {
-				$image = new \Opencart\System\library\Image(DIR_IMAGE . $image_old);
+				$image = new Image(DIR_IMAGE . $image_old);
 				$image->resize($width, $height);
 				$image->save(DIR_IMAGE . $image_new);
 			} else {
@@ -39,6 +38,10 @@ class Image extends \Opencart\System\Engine\Model {
 			}
 		}
 
-		return HTTP_CATALOG . 'image/' . $image_new;
+		if ($this->request->server['HTTPS']) {
+			return HTTPS_CATALOG . 'image/' . $image_new;
+		} else {
+			return HTTP_CATALOG . 'image/' . $image_new;
+		}
 	}
 }

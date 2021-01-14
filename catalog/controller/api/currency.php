@@ -1,10 +1,9 @@
 <?php
-namespace Opencart\Application\Controller\Api;
-class Currency extends \Opencart\System\Engine\Controller {
+class ControllerApiCurrency extends Controller {
 	public function index() {
 		$this->load->language('api/currency');
 
-		$json = [];
+		$json = array();
 
 		if (!isset($this->session->data['api_id'])) {
 			$json['error'] = $this->language->get('error_permission');

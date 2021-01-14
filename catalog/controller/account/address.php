@@ -1,13 +1,12 @@
 <?php
-namespace Opencart\Application\Controller\Account;
-class Address extends \Opencart\System\Engine\Controller {
-	private $error = [];
+class ControllerAccountAddress extends Controller {
+	private $error = array();
 
 	public function index() {
 		if (!$this->customer->isLogged()) {
-			$this->session->data['redirect'] = $this->url->link('account/address', 'language=' . $this->config->get('config_language'));
+			$this->session->data['redirect'] = $this->url->link('account/address', '', true);
 
-			$this->response->redirect($this->url->link('account/login', 'language=' . $this->config->get('config_language')));
+			$this->response->redirect($this->url->link('account/login', '', true));
 		}
 
 		$this->load->language('account/address');
@@ -21,9 +20,9 @@ class Address extends \Opencart\System\Engine\Controller {
 
 	public function add() {
 		if (!$this->customer->isLogged()) {
-			$this->session->data['redirect'] = $this->url->link('account/address', 'language=' . $this->config->get('config_language'));
+			$this->session->data['redirect'] = $this->url->link('account/address', '', true);
 
-			$this->response->redirect($this->url->link('account/login', 'language=' . $this->config->get('config_language')));
+			$this->response->redirect($this->url->link('account/login', '', true));
 		}
 
 		$this->load->language('account/address');
@@ -39,10 +38,10 @@ class Address extends \Opencart\System\Engine\Controller {
 
 		if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validateForm()) {
 			$this->model_account_address->addAddress($this->customer->getId(), $this->request->post);
-
+			
 			$this->session->data['success'] = $this->language->get('text_add');
 
-			$this->response->redirect($this->url->link('account/address', 'language=' . $this->config->get('config_language')));
+			$this->response->redirect($this->url->link('account/address', '', true));
 		}
 
 		$this->getForm();
@@ -50,9 +49,9 @@ class Address extends \Opencart\System\Engine\Controller {
 
 	public function edit() {
 		if (!$this->customer->isLogged()) {
-			$this->session->data['redirect'] = $this->url->link('account/address', 'language=' . $this->config->get('config_language'));
+			$this->session->data['redirect'] = $this->url->link('account/address', '', true);
 
-			$this->response->redirect($this->url->link('account/login', 'language=' . $this->config->get('config_language')));
+			$this->response->redirect($this->url->link('account/login', '', true));
 		}
 
 		$this->load->language('account/address');
@@ -65,7 +64,7 @@ class Address extends \Opencart\System\Engine\Controller {
 		$this->document->addStyle('catalog/view/javascript/jquery/datetimepicker/bootstrap-datetimepicker.min.css');
 
 		$this->load->model('account/address');
-
+		
 		if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validateForm()) {
 			$this->model_account_address->editAddress($this->request->get['address_id'], $this->request->post);
 
@@ -87,7 +86,7 @@ class Address extends \Opencart\System\Engine\Controller {
 
 			$this->session->data['success'] = $this->language->get('text_edit');
 
-			$this->response->redirect($this->url->link('account/address', 'language=' . $this->config->get('config_language')));
+			$this->response->redirect($this->url->link('account/address', '', true));
 		}
 
 		$this->getForm();
@@ -95,9 +94,9 @@ class Address extends \Opencart\System\Engine\Controller {
 
 	public function delete() {
 		if (!$this->customer->isLogged()) {
-			$this->session->data['redirect'] = $this->url->link('account/address', 'language=' . $this->config->get('config_language'));
+			$this->session->data['redirect'] = $this->url->link('account/address', '', true);
 
-			$this->response->redirect($this->url->link('account/login', 'language=' . $this->config->get('config_language')));
+			$this->response->redirect($this->url->link('account/login', '', true));
 		}
 
 		$this->load->language('account/address');
@@ -125,27 +124,27 @@ class Address extends \Opencart\System\Engine\Controller {
 
 			$this->session->data['success'] = $this->language->get('text_delete');
 
-			$this->response->redirect($this->url->link('account/address', 'language=' . $this->config->get('config_language')));
+			$this->response->redirect($this->url->link('account/address', '', true));
 		}
 
 		$this->getList();
 	}
 
 	protected function getList() {
-		$data['breadcrumbs'][] = [
+		$data['breadcrumbs'][] = array(
 			'text' => $this->language->get('text_home'),
-			'href' => $this->url->link('common/home', 'language=' . $this->config->get('config_language'))
-		];
+			'href' => $this->url->link('common/home')
+		);
 
-		$data['breadcrumbs'][] = [
+		$data['breadcrumbs'][] = array(
 			'text' => $this->language->get('text_account'),
-			'href' => $this->url->link('account/account', 'language=' . $this->config->get('config_language'))
-		];
+			'href' => $this->url->link('account/account', '', true)
+		);
 
-		$data['breadcrumbs'][] = [
+		$data['breadcrumbs'][] = array(
 			'text' => $this->language->get('heading_title'),
-			'href' => $this->url->link('account/address', 'language=' . $this->config->get('config_language'))
-		];
+			'href' => $this->url->link('account/address', '', true)
+		);
 
 		if (isset($this->error['warning'])) {
 			$data['error_warning'] = $this->error['warning'];
@@ -161,7 +160,7 @@ class Address extends \Opencart\System\Engine\Controller {
 			$data['success'] = '';
 		}
 
-		$data['addresses'] = [];
+		$data['addresses'] = array();
 
 		$results = $this->model_account_address->getAddresses();
 
@@ -172,7 +171,7 @@ class Address extends \Opencart\System\Engine\Controller {
 				$format = '{firstname} {lastname}' . "\n" . '{company}' . "\n" . '{address_1}' . "\n" . '{address_2}' . "\n" . '{city} {postcode}' . "\n" . '{zone}' . "\n" . '{country}';
 			}
 
-			$find = [
+			$find = array(
 				'{firstname}',
 				'{lastname}',
 				'{company}',
@@ -183,9 +182,9 @@ class Address extends \Opencart\System\Engine\Controller {
 				'{zone}',
 				'{zone_code}',
 				'{country}'
-			];
+			);
 
-			$replace = [
+			$replace = array(
 				'firstname' => $result['firstname'],
 				'lastname'  => $result['lastname'],
 				'company'   => $result['company'],
@@ -196,18 +195,18 @@ class Address extends \Opencart\System\Engine\Controller {
 				'zone'      => $result['zone'],
 				'zone_code' => $result['zone_code'],
 				'country'   => $result['country']
-			];
+			);
 
-			$data['addresses'][] = [
+			$data['addresses'][] = array(
 				'address_id' => $result['address_id'],
-				'address'    => str_replace(["\r\n", "\r", "\n"], '<br />', preg_replace(["/\s\s+/", "/\r\r+/", "/\n\n+/"], '<br />', trim(str_replace($find, $replace, $format)))),
-				'update'     => $this->url->link('account/address|edit', 'language=' . $this->config->get('config_language') . '&address_id=' . $result['address_id']),
-				'delete'     => $this->url->link('account/address|delete', 'language=' . $this->config->get('config_language') . '&address_id=' . $result['address_id'])
-			];
+				'address'    => str_replace(array("\r\n", "\r", "\n"), '<br />', preg_replace(array("/\s\s+/", "/\r\r+/", "/\n\n+/"), '<br />', trim(str_replace($find, $replace, $format)))),
+				'update'     => $this->url->link('account/address/edit', 'address_id=' . $result['address_id'], true),
+				'delete'     => $this->url->link('account/address/delete', 'address_id=' . $result['address_id'], true)
+			);
 		}
 
-		$data['add'] = $this->url->link('account/address|add', 'language=' . $this->config->get('config_language'));
-		$data['back'] = $this->url->link('account/account', 'language=' . $this->config->get('config_language'));
+		$data['add'] = $this->url->link('account/address/add', '', true);
+		$data['back'] = $this->url->link('account/account', '', true);
 
 		$data['column_left'] = $this->load->controller('common/column_left');
 		$data['column_right'] = $this->load->controller('common/column_right');
@@ -220,33 +219,33 @@ class Address extends \Opencart\System\Engine\Controller {
 	}
 
 	protected function getForm() {
-		$data['breadcrumbs'] = [];
+		$data['breadcrumbs'] = array();
 
-		$data['breadcrumbs'][] = [
+		$data['breadcrumbs'][] = array(
 			'text' => $this->language->get('text_home'),
-			'href' => $this->url->link('common/home', 'language=' . $this->config->get('config_language'))
-		];
+			'href' => $this->url->link('common/home')
+		);
 
-		$data['breadcrumbs'][] = [
+		$data['breadcrumbs'][] = array(
 			'text' => $this->language->get('text_account'),
-			'href' => $this->url->link('account/account', 'language=' . $this->config->get('config_language'))
-		];
+			'href' => $this->url->link('account/account', '', true)
+		);
 
-		$data['breadcrumbs'][] = [
+		$data['breadcrumbs'][] = array(
 			'text' => $this->language->get('heading_title'),
-			'href' => $this->url->link('account/address', 'language=' . $this->config->get('config_language'))
-		];
+			'href' => $this->url->link('account/address', '', true)
+		);
 
 		if (!isset($this->request->get['address_id'])) {
-			$data['breadcrumbs'][] = [
+			$data['breadcrumbs'][] = array(
 				'text' => $this->language->get('text_address_add'),
-				'href' => $this->url->link('account/address|add', 'language=' . $this->config->get('config_language'))
-			];
+				'href' => $this->url->link('account/address/add', '', true)
+			);
 		} else {
-			$data['breadcrumbs'][] = [
+			$data['breadcrumbs'][] = array(
 				'text' => $this->language->get('text_address_edit'),
-				'href' => $this->url->link('account/address|edit', 'language=' . $this->config->get('config_language') . '&address_id=' . $this->request->get['address_id'])
-			];
+				'href' => $this->url->link('account/address/edit', 'address_id=' . $this->request->get['address_id'], true)
+			);
 		}
 
 		$data['text_address'] = !isset($this->request->get['address_id']) ? $this->language->get('text_address_add') : $this->language->get('text_address_edit');
@@ -296,13 +295,13 @@ class Address extends \Opencart\System\Engine\Controller {
 		if (isset($this->error['custom_field'])) {
 			$data['error_custom_field'] = $this->error['custom_field'];
 		} else {
-			$data['error_custom_field'] = [];
+			$data['error_custom_field'] = array();
 		}
-
+		
 		if (!isset($this->request->get['address_id'])) {
-			$data['action'] = $this->url->link('account/address|add', 'language=' . $this->config->get('config_language'));
+			$data['action'] = $this->url->link('account/address/add', '', true);
 		} else {
-			$data['action'] = $this->url->link('account/address|edit', 'language=' . $this->config->get('config_language') . '&address_id=' . $this->request->get['address_id']);
+			$data['action'] = $this->url->link('account/address/edit', 'address_id=' . $this->request->get['address_id'], true);
 		}
 
 		if (isset($this->request->get['address_id']) && ($this->request->server['REQUEST_METHOD'] != 'POST')) {
@@ -386,8 +385,8 @@ class Address extends \Opencart\System\Engine\Controller {
 		$data['countries'] = $this->model_localisation_country->getCountries();
 
 		// Custom fields
-		$data['custom_fields'] = [];
-
+		$data['custom_fields'] = array();
+		
 		$this->load->model('account/custom_field');
 
 		$custom_fields = $this->model_account_custom_field->getCustomFields($this->config->get('config_customer_group_id'));
@@ -397,13 +396,13 @@ class Address extends \Opencart\System\Engine\Controller {
 				$data['custom_fields'][] = $custom_field;
 			}
 		}
-
+		
 		if (isset($this->request->post['custom_field']['address'])) {
 			$data['address_custom_field'] = $this->request->post['custom_field']['address'];
 		} elseif (isset($address_info)) {
 			$data['address_custom_field'] = $address_info['custom_field'];
 		} else {
-			$data['address_custom_field'] = [];
+			$data['address_custom_field'] = array();
 		}
 
 		if (isset($this->request->post['default'])) {
@@ -414,7 +413,7 @@ class Address extends \Opencart\System\Engine\Controller {
 			$data['default'] = false;
 		}
 
-		$data['back'] = $this->url->link('account/address', 'language=' . $this->config->get('config_language'));
+		$data['back'] = $this->url->link('account/address', '', true);
 
 		$data['column_left'] = $this->load->controller('common/column_left');
 		$data['column_right'] = $this->load->controller('common/column_right');
@@ -468,7 +467,7 @@ class Address extends \Opencart\System\Engine\Controller {
 			if ($custom_field['location'] == 'address') {
 				if ($custom_field['required'] && empty($this->request->post['custom_field'][$custom_field['location']][$custom_field['custom_field_id']])) {
 					$this->error['custom_field'][$custom_field['custom_field_id']] = sprintf($this->language->get('error_custom_field'), $custom_field['name']);
-				} elseif (($custom_field['type'] == 'text') && !empty($custom_field['validation']) && !filter_var($this->request->post['custom_field'][$custom_field['location']][$custom_field['custom_field_id']], FILTER_VALIDATE_REGEXP, ['options' => ['regexp' => '/' . html_entity_decode($custom_field['validation'], ENT_QUOTES, 'UTF-8') . '/']])) {
+				} elseif (($custom_field['type'] == 'text') && !empty($custom_field['validation']) && !filter_var($this->request->post['custom_field'][$custom_field['location']][$custom_field['custom_field_id']], FILTER_VALIDATE_REGEXP, array('options' => array('regexp' => $custom_field['validation'])))) {
 					$this->error['custom_field'][$custom_field['custom_field_id']] = sprintf($this->language->get('error_custom_field'), $custom_field['name']);
 				}
 			}

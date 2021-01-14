@@ -1,5 +1,4 @@
 <?php
-
 /**
  * SCSSPHP
  *
@@ -11,6 +10,8 @@
  */
 
 namespace ScssPhp\ScssPhp\SourceMap;
+
+use ScssPhp\ScssPhp\SourceMap\Base64;
 
 /**
  * Base 64 VLQ
